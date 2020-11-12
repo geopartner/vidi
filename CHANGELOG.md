@@ -70,6 +70,35 @@ and this project adheres to [CalVer](https://calver.org/).
 - New "Labels" panel for raster tile layers with a checkbox for hiding/showing labels on the layer. Works for both MapServer and QGIS back-end (GC2 must support this).
 - Added boolean config `crossMultiSelect` in `config/config.js`. This will enable cross multi select on both vector and raster tile layers. This will result in a unified feature info experience, which are well suited for informative maps using the `embed.tmpl` template. All feature info results will be displayed in an accordion widget. The accordion summary is default layer title, but can be set to an attribute value with the meta config `accordion_summery`. Can be set in runtime config. 
 - It's now possible to start conflict search from Drawing module. A single drawing or all drawings together can be used for search.
+- WMS layers can now be added directly as base layers. A WMS base layer example:
+```json
+{
+    "type": "wms",
+    "url": "https://services.kortforsyningen.dk/service?SERVICENAME=forvaltning2&",
+    "layers": ["Basis_kort","Navne_basis_kort","Husnummer"],
+    "id": "Basis_kort",
+    "name": "Basiskort",
+    "description": "Basiskort fra kortforsyningen",
+    "attribution": "Kortforsyningen",
+    "minZoom": 4,
+    "maxZoom": 22,
+    "maxNativeZoom": 22
+}
+```
+- XYZ layer can be added as base layer like this (old feature but was undocumented and buggy):
+```json
+{
+    "type": "XYZ",
+    "url": "https://m3.mapserver.mapy.cz/base-m/{z}-{x}-{y}?s=0.3&dm=Luminosity",
+    "id": "mapy",
+    "name": "Mapy",
+    "description": "Map from Mapy",
+    "attribution": "Mapy",
+    "minZoom": 1,
+    "maxZoom": 20,
+    "maxNativeZoom": 19
+}
+```
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
@@ -114,6 +143,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Raster tile layers without pixels (invisible in the map) are now not queried by feature info.
 - Turning on a vector layer will now load the legend of the raster tile representation of the layer.
 - Conflict search now are able to make a print with each hit and merge the PDFs together.
+
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
