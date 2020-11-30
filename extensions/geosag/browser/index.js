@@ -871,24 +871,22 @@ module.exports = {
                         const _self = this;
 
                         let basic = {
+                            fillColor: '#009688',
                             weight: 2,
-                            color: '#ffffff',
+                            color: '#009688',
                             dashArray: 3
                         };
 
                         // TODO: If matrikel is in active list, show it
                         if (_self.alreadyInActive(feature.properties.key)){
                             // In list
-                            basic.fillColor = 'red'
-                            basic.fillOpacity = 0.5
+                            basic.fillOpacity = 0.50
                             basic.opacity = 1
                         } else {
                             // In "memory"
-                            basic.fillColor = '#009688'
                             basic.fillOpacity = 0
                             basic.opacity = 0.5
                             basic.color = '#009688'
-                            basic.weight = 1
                         }
                         return basic;
                     };
@@ -898,7 +896,7 @@ module.exports = {
                         weight: 2,
                         opacity: 1,
                         fillOpacity: 0.75,
-                        color: '#fffffff',
+                        color: '#009688',
                         dashArray: 3,
                         fillOpacity: 3
                     };
