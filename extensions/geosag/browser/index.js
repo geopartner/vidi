@@ -29,6 +29,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import CheckIcon from '@material-ui/icons/Check';
 import ErrorIcon from '@material-ui/icons/Error';
 import Tooltip from '@material-ui/core/Tooltip';
+import MatrikelForm from './MatrikelForm';
 
 /**
  *
@@ -399,7 +400,8 @@ module.exports = {
                             matrList: [],
                             existingMatrList: [],
                             error: '',
-                            saveState: ''
+                            saveState: '',
+                            showForm: false
                         };
 
                         this.readContents = this.readContents.bind(this);
@@ -1025,15 +1027,23 @@ module.exports = {
                             height: '50px',
                             backgroundColor: '#eda72d'
                         }
+                        const tooltipStyle = {
+                            fontSize: '1rem'
+                        }
+
+                        const flexStyle = {
+                            display: 'flex',
+                            alignItems: 'center',
+                        }
 
                         var saveButton = () => {
                             switch(s.saveState) {
                                 case 'saving':
-                                    return <Tooltip title={'Gemmer i på sagen'}><CircularProgress color={"primary"}/></Tooltip>
+                                    return <Tooltip title={<span style={tooltipStyle}>Gemmer på sagen</span>}><CircularProgress size={'2rem'} color={"primary"}/></Tooltip>
                                 case 'done':
-                                    return <Tooltip title={'Alt OK'}><CheckIcon /></Tooltip>
+                                    return <Tooltip title={<span style={tooltipStyle}>Alt OK</span>}><CheckIcon style={{fontSize:'2rem'}} /></Tooltip>
                                 default:
-                                    return <Tooltip title={'Gem ændringer'}><IconButton color={"primary"} onClick={_self.saveChangesHandler.bind(this, s.matrList)}><SaveIcon /></IconButton></Tooltip>
+                                    return <Tooltip title={<span style={tooltipStyle}>Gem ændringer</span>}><IconButton style={{fontSize:'2rem'}} color={"primary"} onClick={_self.saveChangesHandler.bind(this, s.matrList)}><SaveIcon /></IconButton></Tooltip>
                             }
                         }
 
@@ -1044,11 +1054,22 @@ module.exports = {
                                         {s.error.length > 0 && <div style={error} >{s.error}</div>}
                                         <h4>Journalnummer: {s.case.number} {_self.hasChanges() && saveButton()}</h4>
                                         <p>{s.case.title}</p>
-                                        <DAWASearch 
+                                        <div style={flexStyle}>
+                                            <div style={{alignSelf: 'center'}}>
+                                            <DAWASearch 
                                             _handleResult = {_self.findMatrikel}
                                             triggerAtChar = {3}
                                             nocache = {true}
-                                        />
+                                            />
+                                            </div>
+                                            <div style={{alignSelf: 'center', paddingRight: '10px', paddingLeft: '10px'}}>
+                                                <span>Eller</span>
+                                            </div>
+                                            <div style={{alignSelf: 'center'}}>
+                                                <Button onClick={event => _self.setState({ showForm: true })}>Indtast</Button>
+                                            </div>
+                                        </div>
+                                        {s.showForm && <MatrikelForm _handleSave={this.addMatrikelToList}/>}
                                         <MatrikelTable
                                             matrListe = {s.matrList}
                                             shorterLength = {40}

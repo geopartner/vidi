@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { throttle, debounce } from "throttle-debounce";
+import Button from '@material-ui/core/Button';
 
 function uniqBy(a, key) {
     var seen = {};
@@ -191,15 +192,19 @@ class DAWASearch extends React.Component {
         var p = this.props;
         var s = this.state;
 
+
+        // I dont know if i want this..
+        //<Button
+        //type="button"
+        //onClick={event => _self.setState({ searchResults: [], searchTerm: '' })}
+        //>
+        //Reset
+        //</Button>
+
+
         return (
             <div>
                 <input type='text' value= { s.searchTerm } onChange={ this.dynamicSearch } placeholder={ s.placeholder } />
-                <button
-                  type="button"
-                  onClick={event => _self.setState({ searchResults: [], searchTerm: '' })}
-                >
-                  Reset
-                </button>
                 <ResultsList
                     results= { s.searchResults }
                     _handleResult={ _self._handleResult }
@@ -230,9 +235,9 @@ class ResultsList extends React.Component {
                 </div> 
             );
         } else {
-            if (this.props.q.length > 0 && this.props.q.length > this.props.t) {
-                return <p>Der er ikke fundet noget, prøv igen.</p>
-            }
+            //if (this.props.q.length > 0 && this.props.q.length > this.props.t) {
+            //    return <p>Der er ikke fundet noget, prøv igen.</p>
+            //}
             return '';
         }
     }
