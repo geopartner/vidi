@@ -609,10 +609,17 @@ module.exports = {
                         _self.triggerMatrikel(id.key);
                     }
 
-                    zoomToMatrikel(key, maxZoom = 16, padding = 50) {
+                    zoomToMatrikel(key, maxZoom = 17, padding = 50) {
                         const _self = this;
                         var layer = _self.getCustomLayer(key);
-                        cloud.get().map.fitBounds(layer.getBounds(), {padding: [padding, padding], maxZoom: maxZoom});
+                        var currentZoom = cloud.get().getZoom()
+
+                        // If we're already zoomed in, keep that zoom - but center
+                        if (currentZoom > maxZoom) {
+                            cloud.get().map.fitBounds(layer.getBounds(), {padding: [padding, padding], maxZoom: currentZoom});
+                        } else {
+                            cloud.get().map.fitBounds(layer.getBounds(), {padding: [padding, padding], maxZoom: maxZoom});
+                        }
                     }
 
                     zoomToLayer() {
@@ -864,26 +871,36 @@ module.exports = {
                         const _self = this;
 
                         let basic = {
-                            fillColor: 'green', 
-                            fillOpacity: 0.5,  
                             weight: 2,
-                            opacity: 1,
                             color: '#ffffff',
-                            dashArray: '3'
+                            dashArray: 3
                         };
 
                         // TODO: If matrikel is in active list, show it
                         if (_self.alreadyInActive(feature.properties.key)){
+                            // In list
                             basic.fillColor = 'red'
-                            basic.fillOpacity = 0.75
+                            basic.fillOpacity = 0.5
+                            basic.opacity = 1
+                        } else {
+                            // In "memory"
+                            basic.fillColor = '#009688'
+                            basic.fillOpacity = 0
+                            basic.opacity = 0.5
+                            basic.color = '#009688'
+                            basic.weight = 1
                         }
                         return basic;
                     };
 
                     matrikelHighlightStyle = {
-                        'fillColor': 'yellow',
-                        'weight': 2,
-                        'opacity': 1
+                        fillColor: '#009688',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.75,
+                        color: '#fffffff',
+                        dashArray: 3,
+                        fillOpacity: 3
                     };
 
                     matrikelOnEachFeature(feature, layer) {
@@ -891,18 +908,27 @@ module.exports = {
                         var p = feature.properties
 
                         // Construct popup content
+                        var closeAndRedraw =  () => {
+                            layer.closePopup();
+                            //layer.setStyle(_self.matrikelHighlightStyle);
+                            //matrikelLayer.setStyle(_self.matrikelStyle);
+                        }
 
                         var container = $('<div />');
                         container.on('click', '.addMatrikel', function() {
+                            closeAndRedraw();
                             _self.addMatrikel({matrikelnr: p.matrikelnr, ejerlav: p.ejerlavkode}, true);
                         });
                         container.on('click', '.addEjendom', function() {
+                            closeAndRedraw();
                             _self.addEjendom(p.bfenummer);
                         });
                         container.on('click', '.deleteMatrikel', function() {
+                            closeAndRedraw();
                             _self.deleteMatrikel({key:p.key});
                         });
                         container.on('click', '.deleteEjendom', function() {
+                            closeAndRedraw();
                             _self.deleteEjendom(p.bfenummer);
                         });
 
