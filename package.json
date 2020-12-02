@@ -4,6 +4,7 @@
   "description": "Vidi (View) is a new map viewer for GC2 and CartoDB",
   "main": "index.js",
   "scripts": {
+    "cypress:open": "cypress open",
     "serve": "grunt && grunt browserify:watch",
     "serve:watsonc": "grunt --theme=watsonc && grunt --theme=watsonc browserify:watch",
     "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer",
@@ -44,6 +45,7 @@
     "babelify": "^10.0.0",
     "browserify-css": "^0.15.0",
     "chai": "^4.1.2",
+    "cypress": "^6.0.1",
     "envify": "^4.1.0",
     "esmify": "^2.1.1",
     "grunt-bower-task": "^0.5.0",

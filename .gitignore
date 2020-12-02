@@ -130,3 +130,5 @@ public/js/lib/bootstrap-material-design/dist/css/ripples.css
 public/js/lib/bootstrap-material-design/dist/css/ripples.css.map
 public/js/lib/bootstrap-material-design/less/_variables.less
 public/css/styles.css
+cypress/screenshots/All Integration Specs/
+cypress/Integration/examples
