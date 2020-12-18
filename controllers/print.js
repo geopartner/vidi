@@ -119,6 +119,17 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
             response.send({success: true, error: err});
             return;
         }
+
+        /*
+        // Randomly send an error - for testing
+        if (Math.random() > 0.5) {
+            response.status(500).send({
+                success: false
+            });
+            return;
+        }
+        */
+
         const margin = q.tmpl === "_conflictPrint" ? {left: '0.4cm', top: '1cm', right: '0.4cm', bottom: '1cm'} : 0;
         const port = process.env.PORT ? process.env.PORT : 3000;
         let url = "http://127.0.0.1:" + port + '/app/' + q.db + '/' + q.schema + '/' + (q.queryString !== "" ? q.queryString : "?") + '&frame=' + frame + '&session=' + (typeof req.cookies["connect.gc2"] !== "undefined" ? encodeURIComponent(req.cookies["connect.gc2"]) : "") + '&tmpl=' + q.tmpl + '.tmpl&l=' + q.legend + '&h=' + q.header + '&px=' + q.px + '&py=' + q.py + '&td=' + q.dateTime + '&d=' + q.date + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
@@ -180,18 +191,66 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                         });
                     } else {
                         browser.newPage().then(page => {
-                            let width;
-                            let height;
+                            const pxWidth = 790;
+                            const pxHeight = 1116;
                             switch (q.pageSize) {
                                 case "A4":
                                     switch (q.orientation) {
                                         case "p":
-                                            width = 790;
-                                            height = 1116;
+                                            width = pxWidth;
+                                            height = pxHeight;
                                             break;
                                         case "l":
-                                            width = 1116;
-                                            height = 790;
+                                            width = pxHeight;
+                                            height = pxWidth;
+                                            break;
+                                    }
+                                    break;
+                                case "A3":
+                                    switch (q.orientation) {
+                                        case "p":
+                                            width = pxWidth * 1.5;
+                                            height = pxHeight * 1.5;
+                                            break;
+                                        case "l":
+                                            width = pxHeight * 1.5;
+                                            height = pxWidth * 1.5;
+                                            break;
+                                    }
+                                    break;
+                                case "A2":
+                                    switch (q.orientation) {
+                                        case "p":
+                                            width = pxWidth * 2;
+                                            height = pxHeight * 2;
+                                            break;
+                                        case "l":
+                                            width = pxHeight * 2;
+                                            height = pxWidth * 2;
+                                            break;
+                                    }
+                                    break;
+                                case "A1":
+                                    switch (q.orientation) {
+                                        case "p":
+                                            width = pxWidth * 2.5;
+                                            height = pxHeight * 2.5;
+                                            break;
+                                        case "l":
+                                            width = pxHeight * 2.5;
+                                            height = pxWidth * 2.5;
+                                            break;
+                                    }
+                                    break;
+                                case "A0":
+                                    switch (q.orientation) {
+                                        case "p":
+                                            width = pxWidth * 3;
+                                            height = pxHeight * 3;
+                                            break;
+                                        case "l":
+                                            width = pxHeight * 3;
+                                            height = pxWidth * 3;
                                             break;
                                     }
                                     break;

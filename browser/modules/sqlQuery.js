@@ -58,6 +58,9 @@ let defaultSelectedStyle = {
 
 let backArrowIsAdded = false;
 
+let jquery = require('jquery');
+require('snackbarjs');
+
 
 /**
  * A default template for GC2, with a loop
@@ -477,7 +480,7 @@ module.exports = {
                     if (count.index === layers.length) {
                         if (!hit) {
                             $(`#${elementPrefix}modal-info-body`).hide();
-                            $.snackbar({
+                            jquery.snackbar({
                                 content: "<span id=`conflict-progress`>" + __("Didn't find anything") + "</span>",
                                 htmlAllowed: true,
                                 timeout: 2000
@@ -516,7 +519,7 @@ module.exports = {
                 base64: true,
                 styleMap: styleForSelectedFeatures,
                 error: () => {
-                    $.snackbar({
+                    jquery.snackbar({
                         content: "<span>" + __("Error or timeout on") + " " + layerTitel + "</span>",
                         htmlAllowed: true,
                         timeout: 2000
@@ -589,7 +592,7 @@ module.exports = {
                     ];
                 } else {
                     if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                        sql = "SELECT * FROM (SELECT " + fieldStr + " FROM " + value + " WHERE " + filters + ") AS foo WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
+                        sql = "SELECT * FROM (SELECT " + fieldStr + " FROM " + value + " WHERE " + filters + ") AS foo WHERE ST_Intersects (" + f_geometry_column + ", ST_Buffer(ST_Transform(ST_GeomFromText('" + wkt + "' ," + proj +")," +srid + "), " + distance + "))";
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }

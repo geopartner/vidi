@@ -1,8 +1,8 @@
 /*
- * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
- * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
- */
+* @author     Alexander Shumilov
+* @copyright  2013-2018 MapCentia ApS
+* @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+*/
 
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
@@ -18,11 +18,6 @@ const CONFIG = require('../../config/config.js');
  */
 const {detect} = require('detect-browser');
 const browser = detect();
-
-/**
- * Parsing URLs
- */
-const uriJs = require('urijs');
 
 const localforage = require('localforage');
 
@@ -126,6 +121,9 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: '/wms/'
+}, {
+    regExp: true,
+    requested: '/api/print/'
 }];
 
 if (typeof CONFIG.urlsIgnoredForCaching === "object") {
@@ -180,7 +178,7 @@ class Keeper {
                             resolve();
                         } else {
                             let timeout = 300;
-                            console.warn(`Value was not really saved in localforage (${storedValue.created} vs ${initialCreated}), trying again in ${timeout} ms`, JSON.stringify(value));
+                            console.error(`Value was not really saved in localforage (${storedValue.created} vs ${initialCreated}), trying again in ${timeout} ms`, JSON.stringify(value));
                             setTimeout(() => {
                                 localforage.setItem(this._cacheKey, valueCopy).then(() => {
                                     // Checking if value was really saved second time
@@ -189,7 +187,7 @@ class Keeper {
                                             resolve();
                                         } else {
                                             console.error(`Still unable to save the value`);
-                                            reject();
+                                            resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
                                         }
                                     });
                                 });
@@ -306,9 +304,9 @@ const normalizeTheURL = (URL) => {
  * @return {Promise}
  */
 const normalizeTheURLForFetch = (event) => {
-    let URL = event.request.url;
+    let _URL = event.request.url;
     let result = new Promise((resolve, reject) => {
-        let cleanedRequestURL = normalizeTheURL(URL);
+        let cleanedRequestURL = normalizeTheURL(_URL);
         if (event && event.request.url.indexOf('/api/sql') !== -1) {
             let clonedRequest = event.request.clone();
 
@@ -407,12 +405,16 @@ const normalizeTheURLForFetch = (event) => {
              */
             const processGETRequest = (clonedRequest) => {
                 let mappedObject = {};
-                let parsedQuery = new uriJs(clonedRequest.url);
-                let queryParameters = parsedQuery.search(true);
-                if (`q` in queryParameters && queryParameters.q) {
-                    mappedObject.q = queryParameters.q;
+                let url = new URL(clonedRequest.url)
+                let searchParams = new URLSearchParams(url.search);
+                let urlVars = {};
+                for (let p of searchParams) {
+                    urlVars[p[0]] = p[1];
                 }
-
+                console.log("GET in SW", urlVars);
+                if (`q` in urlVars && urlVars.q) {
+                    mappedObject.q = urlVars.q;
+                }
                 proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
             };
 
