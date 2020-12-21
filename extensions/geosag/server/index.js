@@ -11,7 +11,7 @@ var fetch = require('node-fetch');
 const wkt = require('wkt');
 
 
-const debug = true;
+const debug = false;
 var yell = function(obj) {
     if (debug) {
         console.log(obj)
@@ -69,9 +69,11 @@ function getDocunote(endpoint) {
         // Do async job
         request.get(api, function(err, resp, body) {
             if (err) {
+                yell(err)
                 yell(api.method + ': ' + api.url + ' - Recieved - ERROR');
                 reject(err);
             } else {
+                yell(body)
                 yell(api.method + ': ' + api.url + ' - Recieved - OK');
                 resolve(body);
             }
@@ -114,6 +116,7 @@ function verifyUser(request) {
                 resolve({success: true, message:'User allowed'});
             } else {
                 console.log(`GeoSag: Blocked access for ${request.connection.remoteAddress}/${request.headers['x-forwarded-for']}`)
+                console.log(`GeoSag: Address not in ${dn.allow_from}`)
                 reject({success: false, message:'User not allowed'});
             }
     });  

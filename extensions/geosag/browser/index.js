@@ -97,8 +97,8 @@ var config = require('../../../config/config.js');
 //    var user = urlparser.urlVars.user;
 //}
 var user = 'none';
-if (urlparser.urlVars.sagsnummer) {
-    var sagsnr = urlparser.urlVars.sagsnummer;
+if (urlparser.urlVars.sagsnr) {
+    var sagsnr = urlparser.urlVars.sagsnr;
 }
 
 require('snackbarjs');
@@ -440,12 +440,12 @@ module.exports = {
                             console.log(`Starting ${exId}`)
 
                             // If neither is set, error out
-                            console.log(`user: ${user}`)
-                            console.log(`sagsnr: ${sagsnr}`)
-                            if (user == undefined && sagsnr == undefined) {
+                            //console.log(`user: ${user}`)
+                            //console.log(`sagsnr: ${sagsnr}`)
+                            if (sagsnr == undefined) {
                                 me.setState({
                                     allow: false,
-                                    error: "Mangler bruger og journalnummer."
+                                    error: "Mangler sagsnr."
                                 })
                             } else {
                                 me.refreshFromDocunote(sagsnr, user)
@@ -560,7 +560,9 @@ module.exports = {
                         .then(r => {
                             console.log(r)
                             // Has error? 
-                            if ('ErrorCode' in r){
+                            if (r == 'Unauthorized request') {
+                                throw 'Unauthorized request'
+                            } else if ('ErrorCode' in r){
                                 throw r["Message"]
                             } else {
                                 _self.setState({
@@ -1045,15 +1047,13 @@ module.exports = {
                         var saveButton = () => {
                             switch(s.saveState) {
                                 case 'saving':
-                                    return <Tooltip title={<span style={tooltipStyle}>Gemmer på sagen</span>}><CircularProgress size={'2rem'} color={"primary"}/></Tooltip>
+                                    return <Tooltip title={<span style={tooltipStyle}>Gemmer på sagen</span>}><CircularProgress color={"primary"}/></Tooltip>
                                 case 'done':
-                                    return <Tooltip title={<span style={tooltipStyle}>Alt OK</span>}><CheckIcon style={{fontSize:'2rem'}} /></Tooltip>
+                                    return <Tooltip title={<span style={tooltipStyle}>Alt OK</span>}><CheckIcon /></Tooltip>
                                 default:
-                                    return <Tooltip title={<span style={tooltipStyle}>Gem ændringer</span>}><IconButton style={{fontSize:'2rem'}} color={"primary"} onClick={_self.saveChangesHandler.bind(this, s.matrList)}><SaveIcon /></IconButton></Tooltip>
+                                    return <Tooltip title={<span style={tooltipStyle}>Gem ændringer</span>}><IconButton color={"primary"} onClick={_self.saveChangesHandler.bind(this, s.matrList)}><SaveIcon /></IconButton></Tooltip>
                             }
                         }
-
-                        console.log(s)
 
                         if (s.allow) {
                             return (
@@ -1066,15 +1066,8 @@ module.exports = {
                                             <div style={{alignSelf: 'center'}}>
                                             <DAWASearch 
                                             _handleResult = {_self.findMatrikel}
-                                            triggerAtChar = {3}
                                             nocache = {true}
                                             />
-                                            </div>
-                                            <div style={{alignSelf: 'center', paddingRight: '10px', paddingLeft: '10px'}}>
-                                                <span>Eller</span>
-                                            </div>
-                                            <div style={{alignSelf: 'center'}}>
-                                                <Button onClick={event => _self.setState({ showForm: true })}>Indtast</Button>
                                             </div>
                                         </div>
                                         <MatrikelTable

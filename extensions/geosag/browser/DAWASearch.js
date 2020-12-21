@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { throttle, debounce } from "throttle-debounce";
-import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import ClearIcon from '@material-ui/icons/Clear';
 
 function uniqBy(a, key) {
     var seen = {};
@@ -37,11 +38,11 @@ class DAWASearch extends React.Component {
             enableSFE: (props.enableSFE === undefined ) ? true : props.enableSFE,
 
             placeholder: this.buildPlaceholder(),
-            triggerAtChar: (props.triggerAtChar === undefined ) ? 4 : parseInt(props.triggerAtChar)
+            triggerAtChar: (props.triggerAtChar === undefined ) ? 0 : parseInt(props.triggerAtChar)
 
         };
-        this.autocompleteSearchDebounced = debounce(850, this.autocompleteSearch);
-        this.autocompleteSearchThrottled = throttle(850, this.autocompleteSearch);
+        this.autocompleteSearchDebounced = debounce(650, this.autocompleteSearch);
+        this.autocompleteSearchThrottled = throttle(650, this.autocompleteSearch);
 
     }
 
@@ -193,24 +194,24 @@ class DAWASearch extends React.Component {
         var s = this.state;
 
 
-        // I dont know if i want this..
-        //<Button
-        //type="button"
-        //onClick={event => _self.setState({ searchResults: [], searchTerm: '' })}
-        //>
-        //Reset
-        //</Button>
-
-
         return (
             <div>
-                <input type='text' value= { s.searchTerm } onChange={ this.dynamicSearch } placeholder={ s.placeholder } />
+                <input id="geosag-input" type='text' value= { s.searchTerm } onChange={ this.dynamicSearch } placeholder={ s.placeholder } />
                 <ResultsList
                     results= { s.searchResults }
                     _handleResult={ _self._handleResult }
                     q={ s.searchTerm }
                     t={ s.triggerAtChar }
                 />
+                {s.searchTerm.length > 0 && 
+                <IconButton
+                    onClick={event => _self.setState({ searchResults: [], searchTerm: '' })}
+                    size= {'small'}
+                    >
+                    <ClearIcon />
+                </IconButton>
+                }
+                
             </div>
         );
     }
@@ -231,7 +232,7 @@ class ResultsList extends React.Component {
         if (this.props.results.length > 0) {
             return (
                 <div id="geosag-results">
-                    {this.props.results.map(r => <div class="geosag-result" onClick={_self._handleResult.bind(this, r)} key={r.tekst}>{r.tekst}</div>)}
+                    {this.props.results.map(r => <div className="geosag-result" onClick={_self._handleResult.bind(this, r)} key={r.tekst}>{r.tekst}</div>)}
                 </div> 
             );
         } else {
