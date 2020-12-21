@@ -29,7 +29,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import CheckIcon from '@material-ui/icons/Check';
 import ErrorIcon from '@material-ui/icons/Error';
 import Tooltip from '@material-ui/core/Tooltip';
-import MatrikelForm from './MatrikelForm';
+import { reject } from 'async';
 
 /**
  *
@@ -97,8 +97,8 @@ var config = require('../../../config/config.js');
 //    var user = urlparser.urlVars.user;
 //}
 var user = 'none';
-if (urlparser.urlVars.sagsnr) {
-    var sagsnr = urlparser.urlVars.sagsnr;
+if (urlparser.urlVars.sagsnummer) {
+    var sagsnr = urlparser.urlVars.sagsnummer;
 }
 
 require('snackbarjs');
@@ -232,6 +232,7 @@ module.exports = {
                             })
                             .catch(e => {
                                 console.log(e)
+
                                 reject(e)
                             });
                     })
@@ -558,10 +559,16 @@ module.exports = {
                         getCase(sagsnr)
                         .then(r => {
                             console.log(r)
-                            _self.setState({
-                                case: r
-                            })
-                            return getExistingMatr(r.caseId)
+                            // Has error? 
+                            if ('ErrorCode' in r){
+                                throw r["Message"]
+                            } else {
+                                _self.setState({
+                                    case: r
+                                })
+                                return getExistingMatr(r.caseId)
+                            }
+                            
                         })
                         .then(r => {
                             //console.log(r)
@@ -586,7 +593,7 @@ module.exports = {
                             console.log(e)
                             _self.setState({
                                 allow: false,
-                                error: e
+                                error: e.toString()
                             })
                         })
                     }
@@ -1024,7 +1031,6 @@ module.exports = {
                             textAlign: 'center',
                             fontSize: '2rem',
                             margin: '1rem',
-                            height: '50px',
                             backgroundColor: '#eda72d'
                         }
                         const tooltipStyle = {
@@ -1046,6 +1052,8 @@ module.exports = {
                                     return <Tooltip title={<span style={tooltipStyle}>Gem ændringer</span>}><IconButton style={{fontSize:'2rem'}} color={"primary"} onClick={_self.saveChangesHandler.bind(this, s.matrList)}><SaveIcon /></IconButton></Tooltip>
                             }
                         }
+
+                        console.log(s)
 
                         if (s.allow) {
                             return (
@@ -1069,7 +1077,6 @@ module.exports = {
                                                 <Button onClick={event => _self.setState({ showForm: true })}>Indtast</Button>
                                             </div>
                                         </div>
-                                        {s.showForm && <MatrikelForm _handleSave={this.addMatrikelToList}/>}
                                         <MatrikelTable
                                             matrListe = {s.matrList}
                                             shorterLength = {40}
@@ -1083,8 +1090,7 @@ module.exports = {
                             return (
                                 <div role = "tabpanel" >
                                     <div className = "form-group" >
-                                        {s.error.length > 0 && <div style={error} >{s.error}</div>}
-                                        Indlæser.
+                                        {s.error.length > 0 ? <div style={error} >{s.error}</div> : 'Indlæser...'}
                                     </div>
                                 </div>
                             )
