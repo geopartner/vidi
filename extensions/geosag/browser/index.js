@@ -641,22 +641,36 @@ module.exports = {
                         var layer = _self.getCustomLayer(key);
                         var currentZoom = cloud.get().getZoom()
 
-                        // If we're already zoomed in, keep that zoom - but center
-                        if (currentZoom > maxZoom) {
-                            cloud.get().map.fitBounds(layer.getBounds(), {padding: [padding, padding], maxZoom: currentZoom});
-                        } else {
-                            cloud.get().map.fitBounds(layer.getBounds(), {padding: [padding, padding], maxZoom: maxZoom});
+                        try {
+                            // If we're already zoomed in, keep that zoom - but center
+                            if (currentZoom > maxZoom) {
+                                cloud.get().map.fitBounds(layer.getBounds(), {padding: [padding, padding], maxZoom: currentZoom});
+                            } else {
+                                cloud.get().map.fitBounds(layer.getBounds(), {padding: [padding, padding], maxZoom: maxZoom});
+                            }
+                        }
+                        catch(err) {
+                          console.log(err)
+                          // if we fail to set extents, just go home.
+                          this.goToHome()
                         }
                     }
 
                     zoomToLayer() {
                         const _self = this;
-                        if (_self.state.matrList.length > 0) {
+
+                        try {
                             cloud.get().map.fitBounds(matrikelLayer.getBounds());
-                        } else {
-                            // This should have been the extents set in GC2 admin, but i couldn't be arsed.
-                            cloud.get().map.panTo(new L.LatLng(56.0751,8.7561), 7);
-                        }  
+                        }
+                        catch(err) {
+                          console.log(err)
+                          // if we fail to set extents, just go home.
+                          this.goToHome()
+                        } 
+                    }
+
+                    goToHome() {
+                        cloud.get().map.panTo(new L.LatLng(56.0751,8.7561), 7);
                     }
 
                     triggerMatrikel(key, event = 'click') {
