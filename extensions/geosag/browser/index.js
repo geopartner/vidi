@@ -901,13 +901,13 @@ module.exports = {
                                 try {
                                     clean.ejerlavskode = matr.customData.ejerlavskode
                                     clean.ejerlavsnavn = (itsSomething(matr.lastName)) ? unableToGetValue : matr.lastName
-                                    clean.matrikelnr =  matr.customData.matrnrcustom
+                                    clean.matrikelnr =  matr.synchronizeIdentifier.replace(clean.ejerlavskode, '')
                                     clean.kommune =  (itsSomething(matr.customData.matrkomnavn)) ? unableToGetValue : matr.customData.matrkomnavn
                                     clean.kommunekode = (itsSomething(matr.customData.kommunenr)) ? unableToGetValue : matr.customData.kommunenr
                                     clean.bfe =  (itsSomething(matr.customData.bfenummer)) ? unableToGetValue : matr.customData.bfenummer
                                     clean.esr =  (itsSomething(matr.customData.matresrnr)) ? unableToGetValue : matr.customData.matresrnr
     
-                                    clean.key = clean.ejerlavskode+clean.matrikelnr
+                                    clean.key = matr.synchronizeIdentifier
                                     resolve(clean)
                                 } catch (error) {
                                     console.log(error)
