@@ -714,7 +714,7 @@ function SQLAPI(q, req) {
         key: req.session.gc2ApiKey,
         q: q
     })
-    var url = 'http://'+ GC2_HOST + '/api/v2/sql/' + userstr
+    var url = GC2_HOST + '/api/v2/sql/' + userstr
     var options = {
         method: 'POST',
         headers: {
