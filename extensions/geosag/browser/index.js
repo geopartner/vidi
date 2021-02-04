@@ -711,8 +711,8 @@ module.exports = {
                                 })
 
                             } else {
-                                console.log('unknown')
-                                console.log(id)
+                                //console.log('unknown')
+                                //console.log(id)
                                 getJordstykkeByMatr(id.matrikelnr, id.ejerlav.toString())
                                 .then(r => {
                                     resolve(r)
@@ -805,6 +805,12 @@ module.exports = {
                                 matrList: prev,
                                 saveState: ''
                             })
+                        } else {
+                            // Let user know it's already in list!
+                            //console.log(id)
+                            let x = id
+                            let msg = `${x.matrikelnr}, ${x.ejerlavsnavn} er allerede valgt.`
+                            snack(msg)
                         }
                     }
 
