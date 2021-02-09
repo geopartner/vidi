@@ -358,7 +358,7 @@ module.exports = {
                             .then(r => r.json())
                             .then(d => {
                                 // If no found, handle
-                                console.log(d)
+                                //console.log(d)
 
                                 if (d.type == 'Feature') {
                                     d.properties.key = elavkode+matr
@@ -574,7 +574,7 @@ module.exports = {
                         // Get case
                         getCase(sagsnr)
                         .then(r => {
-                            console.log(r)
+                            //console.log(r)
                             // Has error? 
                             if (r == 'Unauthorized request') {
                                 throw 'Unauthorized request'
@@ -1111,8 +1111,8 @@ module.exports = {
                                         <div style={flexStyle}>
                                             <div style={{alignSelf: 'center'}}>
                                             <DAWASearch 
-                                            _handleResult = {_self.findMatrikel}
-                                            nocache = {true}
+                                                _handleResult = {_self.findMatrikel}
+                                                nocache = {true}
                                             />
                                             </div>
                                         </div>

@@ -197,21 +197,21 @@ class DAWASearch extends React.Component {
         return (
             <div>
                 <input id="geosag-input" type='text' value= { s.searchTerm } onChange={ this.dynamicSearch } placeholder={ s.placeholder } />
-                <ResultsList
-                    results= { s.searchResults }
-                    _handleResult={ _self._handleResult }
-                    q={ s.searchTerm }
-                    t={ s.triggerAtChar }
-                />
                 {s.searchTerm.length > 0 && 
                 <IconButton
+                    className="geosag-clear-button"
                     onClick={event => _self.setState({ searchResults: [], searchTerm: '' })}
                     size= {'small'}
                     >
                     <ClearIcon />
                 </IconButton>
                 }
-                
+                <ResultsList
+                    results= { s.searchResults }
+                    _handleResult={ _self._handleResult }
+                    q={ s.searchTerm }
+                    t={ s.triggerAtChar }
+                />
             </div>
         );
     }
