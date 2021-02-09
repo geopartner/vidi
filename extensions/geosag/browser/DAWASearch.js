@@ -9,6 +9,7 @@ import { throttle, debounce } from "throttle-debounce";
 import IconButton from '@material-ui/core/IconButton';
 import ClearIcon from '@material-ui/icons/Clear';
 
+
 function uniqBy(a, key) {
     var seen = {};
     return a.filter(function(item) {
@@ -43,7 +44,25 @@ class DAWASearch extends React.Component {
         };
         this.autocompleteSearchDebounced = debounce(650, this.autocompleteSearch);
         this.autocompleteSearchThrottled = throttle(650, this.autocompleteSearch);
+        this.escFunction = this.escFunction.bind(this);
 
+    }
+    componentDidMount(){
+        document.addEventListener("keydown", this.escFunction, false);
+      }
+    componentWillUnmount(){
+      document.removeEventListener("keydown", this.escFunction, false);
+    }
+
+    escFunction(event){
+        if(event.keyCode === 27) {
+          this.clear();
+        }
+      }
+
+    clear(){
+        const _self = this;
+        _self.setState({ searchResults: [], searchTerm: '' })
     }
 
     buildPlaceholder() {
@@ -200,12 +219,13 @@ class DAWASearch extends React.Component {
                 {s.searchTerm.length > 0 && 
                 <IconButton
                     className="geosag-clear-button"
-                    onClick={event => _self.setState({ searchResults: [], searchTerm: '' })}
+                    onClick={event => this.clear()}
                     size= {'small'}
                     >
                     <ClearIcon />
                 </IconButton>
                 }
+                
                 <ResultsList
                     results= { s.searchResults }
                     _handleResult={ _self._handleResult }
