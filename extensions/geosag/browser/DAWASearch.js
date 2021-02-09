@@ -42,8 +42,8 @@ class DAWASearch extends React.Component {
             triggerAtChar: (props.triggerAtChar === undefined ) ? 0 : parseInt(props.triggerAtChar)
 
         };
-        this.autocompleteSearchDebounced = debounce(650, this.autocompleteSearch);
-        this.autocompleteSearchThrottled = throttle(650, this.autocompleteSearch);
+        this.autocompleteSearchDebounced = debounce(1200, this.autocompleteSearch);
+        this.autocompleteSearchThrottled = throttle(1200, this.autocompleteSearch);
         this.escFunction = this.escFunction.bind(this);
 
     }
