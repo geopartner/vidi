@@ -909,7 +909,7 @@ var documentCreateFeatureSend = function (tablename, feature) {
       snack(__("GC2 Error") + ": " + xhr.responseText);
       $("#submitbtn").prop("disabled", false);
       allowSubmit = true;
-    }
+    },
   });
 };
 
@@ -1924,7 +1924,8 @@ module.exports = {
               style={{
                 display: "none",
                 position: "absolute",
-                bottom: "10px",
+                top: "5px",
+                left: "35px",
                 fontSize: "x-small",
               }}
             >
