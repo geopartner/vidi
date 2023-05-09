@@ -555,10 +555,9 @@ var turnOffLayer = (layer) => {
     return;
   }
 
-  // if layer is on, turn it off
-  if (isOn(layer)) {
-    switchLayer.init(layer, false);
-  }
+  // turn layer off
+  switchLayer.init(layer, false);
+
 };
 
 /**
@@ -572,9 +571,7 @@ var turnOnLayer = (layer, filter = null) => {
   }
 
   // if the layer is not on the map, anf the filter is empty, turn it on
-  if (!isOn(layer)) {
-    switchLayer.init(layer, true);
-  }
+  switchLayer.init(layer, true);
 
   // if the filter is not empty, apply it, and refresh the layer
   if (filter) {
@@ -1020,22 +1017,16 @@ var buildFeatureMeta = function (layer, previousLayer = undefined) {
     let smallKey = d.f_table_schema + "." + d.f_table_name;
     try {
       // Guard against d not having _key_ equal to layer or previousLayer
-      if (smallKey == layer || smallKey == previousLayer) {
+      if (smallKey == layer) {
         // Get information from config.json
         var confLayer = config.extensionConfig.documentCreate.tables.find(
           (x) => x.table == d.f_table_name
         );
+        m = d;
         if (confLayer && confLayer.cosmeticbackgroundlayer) {
-          if (smallKey == previousLayer) {
-            // Turn off previous layers cosmeticbackgroundlayer
-            turnOffLayer(confLayer.cosmeticbackgroundlayer);
-          }
-
           if (smallKey == layer) {
             // Turn on current layers cosmeticbackgroundlayer
             turnOnLayer(confLayer.cosmeticbackgroundlayer);
-            // Set metadata for next step
-            m = d;
           }
         }
       }
@@ -1737,10 +1728,15 @@ module.exports = {
         this.onServiceChange = function (e) {
           console.log("select was changed");
 
+          
+
           //rebuild from metaData
           if ($("#" + select_id).val() != "") {
             //Build the boxes
-            buildFeatureMeta($("#" + select_id).val(), thePreviousServiceValue);
+            Promise.all([turnOffLayer("vmr.spildevand_wms_niras"),turnOffLayer("vmr.vand_wms_niras")]).then(function () {
+              //console.log("all layers turned off");
+              buildFeatureMeta($("#" + select_id).val(), thePreviousServiceValue);
+            });
           } else {
             // "Nothing" is chosen, hide the meta
             SetGUI_ControlState(GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE);
