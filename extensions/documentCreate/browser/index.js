@@ -248,7 +248,9 @@ var getExistingDocs = function (key, fileIdent = false) {
       $("#documentList-feature-content").append("</tr>");
     }
 
+    // If fileIdent is set, bu no cases are found, show snack
     if (fileIdent && !caseFound) {
+      snack('Sag ' + key + ' - ' + __('ikke fundet'))
       throw new Error("No existing cases found");
     }
   }
@@ -1224,7 +1226,7 @@ var SetGUI_ControlState = function (state_Enum) {
     $("#documentCreate-feature-filter-header-edit").hide();
     $("#documentCreate-newfeature-content").hide();
     $("#documentCreate-feature-meta").html("");
-    $("#documentCreate-status").hide();
+    //$("#documentCreate-status").hide();
     $("#documentCreate-feature-missingsynchronization").hide();
 
     // subtract this enumeration, and continue
@@ -1343,7 +1345,7 @@ var loadAndInitFilters = function (active_state) {
         //check for stuff
         if (data.features == null || data.features[0].properties == null) {
           //nothing.. return null .. do nothing
-          $("#documentCreate-status").hide();
+          //$("#documentCreate-status").hide();
           return null;
         } else {
           $("#documentCreate-status").show();
