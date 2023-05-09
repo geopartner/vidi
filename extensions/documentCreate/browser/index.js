@@ -557,7 +557,6 @@ var turnOffLayer = (layer) => {
 
   // turn layer off
   switchLayer.init(layer, false);
-
 };
 
 /**
@@ -571,15 +570,15 @@ var turnOnLayer = (layer, filter = null) => {
   }
 
   // if the layer is not on the map, anf the filter is empty, turn it on
-  switchLayer.init(layer, true);
-
-  // if the filter is not empty, apply it, and refresh the layer
-  if (filter) {
-    layerTree.onApplyArbitraryFiltersHandler(
-      { layerKey: layer, filters: filter },
-      true
-    );
-  }
+  switchLayer.init(layer, true).then(() => {
+    // if the filter is not empty, apply it, and refresh the layer
+    if (filter) {
+      layerTree.onApplyArbitraryFiltersHandler(
+        { layerKey: layer, filters: filter },
+        true
+      );
+    }
+  });
 };
 
 var documentCreateBuildFilter = function (
@@ -668,7 +667,8 @@ var documentCreateApplyFilter = function (filter) {
     firstRunner
   );
 
-  if (DClayers.length > 0 && _USERSTR.length > 0 && firstRunner === false) {
+  if (DClayers.length > 0 && _USERSTR.length > 0) {
+  //if (DClayers.length > 0 && _USERSTR.length > 0 && firstRunner === false) {
     for (let layerKey in filter) {
       console.log(
         "documentCreate - Apply filter to " + layerKey,
@@ -1728,14 +1728,18 @@ module.exports = {
         this.onServiceChange = function (e) {
           console.log("select was changed");
 
-          
-
           //rebuild from metaData
           if ($("#" + select_id).val() != "") {
             //Build the boxes
-            Promise.all([turnOffLayer("vmr.spildevand_wms_niras"),turnOffLayer("vmr.vand_wms_niras")]).then(function () {
+            Promise.all([
+              turnOffLayer("vmr.spildevand_wms_niras"),
+              turnOffLayer("vmr.vand_wms_niras"),
+            ]).then(function () {
               //console.log("all layers turned off");
-              buildFeatureMeta($("#" + select_id).val(), thePreviousServiceValue);
+              buildFeatureMeta(
+                $("#" + select_id).val(),
+                thePreviousServiceValue
+              );
             });
           } else {
             // "Nothing" is chosen, hide the meta
