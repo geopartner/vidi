@@ -254,11 +254,10 @@ var getExistingDocs = function (key, fileIdent = false) {
   }
   $("#documentList-feature-content").append("</tbody></table>");
 
-  console.log(existingcases, fileIdent, caseFound, layersToReload);
+  // console.log(existingcases, fileIdent, caseFound, layersToReload);
 
   // reload cosmetic layer (if layer ident is found and specified)
   if (fileIdent && caseFound) {
-    var Promises = [];
     layersToReload.forEach((element) => {
       // Get information from config.json
       var conf = config.extensionConfig.documentCreate.tables.find(
@@ -267,21 +266,12 @@ var getExistingDocs = function (key, fileIdent = false) {
 
       // set the cosmetic backgroundlayer visible (if specified)
       if (conf.cosmeticbackgroundlayer) {
-        Promises.push(layerTree.reloadLayer(conf.cosmeticbackgroundlayer));
+        turnOnLayer(conf.cosmeticbackgroundlayer);
       }
 
       // load the layer
-      Promises.push(layerTree.reloadLayer(conf.table));
+      turnOnLayer(conf.table);
     });
-
-    // resoleve all promises
-    Promise.all(Promises)
-      .then(function (values) {
-        console.log(values);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
   }
 
   if (fileIdent && caseFound) {
@@ -541,6 +531,60 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
   return result;
 };
 
+/**
+ * This function checks if a layer is on
+ */
+let isOn = (layer) => {
+  // if layer is in layerTree.getActiveLayers() return true
+  let activeLayers = layerTree.getActiveLayers();
+  for (let i = 0; i < activeLayers.length; i++) {
+    if (activeLayers[i].id == layer) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * This funvtion turns off a layer
+ */
+var turnOffLayer = (layer) => {
+  console.log("turnOffLayer", layer);
+  // guard against empty layer
+  if (!layer) {
+    return;
+  }
+
+  // if layer is on, turn it off
+  if (isOn(layer)) {
+    switchLayer.init(layer, false);
+  }
+};
+
+/**
+ * This function turns on a layer, if it is not already on the map, and refreshes the map if there is a filter set.
+ */
+var turnOnLayer = (layer, filter = null) => {
+  console.log("turnOnLayer", layer, filter);
+  // guard against empty layer
+  if (!layer) {
+    return;
+  }
+
+  // if the layer is not on the map, anf the filter is empty, turn it on
+  if (!isOn(layer)) {
+    switchLayer.init(layer, true);
+  }
+
+  // if the filter is not empty, apply it, and refresh the layer
+  if (filter) {
+    layerTree.onApplyArbitraryFiltersHandler(
+      { layerKey: layer, filters: filter },
+      true
+    );
+  }
+};
+
 var documentCreateBuildFilter = function (
   key = undefined,
   isfileIdent = false
@@ -556,9 +600,22 @@ var documentCreateBuildFilter = function (
 
     if (!key) {
       // If no key is set, create the "clear" filter
+      //filter[DClayers[l]] = {
+      //  match: "any",
+      //  columns: [],
+      //};
+
+      // insert fixed dummy filter
       filter[DClayers[l]] = {
         match: "any",
-        columns: [],
+        columns: [
+          {
+            fieldname: "adresse",
+            expression: "=",
+            value: "---",
+            restriction: false,
+          },
+        ],
       };
     } else {
       // set the filter based on config
@@ -613,51 +670,19 @@ var documentCreateApplyFilter = function (filter) {
     "firstRunner:",
     firstRunner
   );
-  console.log(filter);
+
   if (DClayers.length > 0 && _USERSTR.length > 0 && firstRunner === false) {
     for (let layerKey in filter) {
-      console.log("documentCreate - Apply filter to " + layerKey);
+      console.log(
+        "documentCreate - Apply filter to " + layerKey,
+        filter[layerKey]
+      );
 
-      //Make sure layer is on
-      //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
-      layerTree
-        .reloadLayer(layerKey)
-        .then((result) => {
-          //console.log('documentCreate - layer reloaded')
-          //Toggle the filter
-          if (filter[layerKey].columns.length == 0) {
-            // insert fixed dummy filter
-            // in order to filter out all features from layer
-            var blankfeed = {
-              expression: "=",
-              fieldname: "adresse",
-              restriction: false,
-              value: "---",
-            };
-            filter[layerKey].columns.push(blankfeed);
-
-            layerTree.onApplyArbitraryFiltersHandler(
-              { layerKey, filters: filter[layerKey] },
-              "t"
-            );
-          } else {
-            layerTree.onApplyArbitraryFiltersHandler(
-              { layerKey, filters: filter[layerKey] },
-              "t"
-            );
-          }
-        })
-        .catch((error) => {
-          console.log("documentCreate - layer reload failed");
-        })
-        .finally(() => {
-          // reload layer
-          console.log("documentCreate - layer reload finished");
-          layerTree.reloadLayer(layerKey);
-        });
+      turnOnLayer(layerKey, filter[layerKey]);
     }
   }
 };
+
 var clearExistingDocFilters = function () {
   // clear filters from layers that might be on! - then reload
   console.log("documentCreate - cleaning filters for reload");
@@ -710,7 +735,7 @@ var onSearchLoad = function () {
     //$('#' + select_id).val(config.extensionConfig.documentCreate.defaulttable)
     //$('#' + select_id + ' option[value=' + config.extensionConfig.documentCreate.defaulttable + ']').attr('selected','selected');
     //build
-    buildFeatureMeta(config.extensionConfig.documentCreate.defaulttable);
+    buildFeatureMeta(config.extensionConfig.documentCreate.defaulttable, null);
   }
   //set submit button active and allow to edit map location
   SetGUI_ControlState(GUI_CONTROL_STATE.ACTIVATE_SUBMIT_CONTROL);
@@ -967,7 +992,11 @@ var buildServiceSelect = function (id) {
       .find("option")
       .get(0)
       .remove();
+
+    // load for default value
+    buildFeatureMeta($("#" + select_id).val(), null);
   } else {
+    console.log(config.extensionConfig.documentCreate);
     throw new Error(
       "No layers found with tag: " +
         config.extensionConfig.documentCreate.metaTag
@@ -981,31 +1010,37 @@ var buildServiceSelect = function (id) {
  * @private
  */
 var buildFeatureMeta = function (layer, previousLayer = undefined) {
-  console.log(layer, previousLayer);
+  console.log("buildFeatureMeta", layer, previousLayer);
   //merge information from metadata
   var m = {};
 
+  //If previous layer is set, turn it off.
   var metaData = meta.getMetaData();
   metaData.data.forEach(function (d) {
-    if (d.fields) {
-      //Get information from config.json
-      var confLayer = config.extensionConfig.documentCreate.tables.find(
-        (x) => x.table == d.f_table_name
-      );
-      // set the backgroundlayer invisible
+    let smallKey = d.f_table_schema + "." + d.f_table_name;
+    try {
+      // Guard against d not having _key_ equal to layer or previousLayer
+      if (smallKey == layer || smallKey == previousLayer) {
+        // Get information from config.json
+        var confLayer = config.extensionConfig.documentCreate.tables.find(
+          (x) => x.table == d.f_table_name
+        );
+        if (confLayer && confLayer.cosmeticbackgroundlayer) {
+          if (smallKey == previousLayer) {
+            // Turn off previous layers cosmeticbackgroundlayer
+            turnOffLayer(confLayer.cosmeticbackgroundlayer);
+          }
 
-      //What?
-      if (confLayer && confLayer.cosmeticbackgroundlayer) {
-        //switchLayer.init(confLayer.cosmeticbackgroundlayer, false, false, false);
-        layerTree.reloadLayer(confLayer.cosmeticbackgroundlayer);
+          if (smallKey == layer) {
+            // Turn on current layers cosmeticbackgroundlayer
+            turnOnLayer(confLayer.cosmeticbackgroundlayer);
+            // Set metadata for next step
+            m = d;
+          }
+        }
       }
-    }
-
-    if (
-      d.f_table_name == layer.split(".")[1] &&
-      d.f_table_schema == layer.split(".")[0]
-    ) {
-      m = d;
+    } catch (error) {
+      console.log(error);
     }
   });
 
@@ -1018,11 +1053,6 @@ var buildFeatureMeta = function (layer, previousLayer = undefined) {
     var conf = config.extensionConfig.documentCreate.tables.find(
       (x) => x.table == m.f_table_name
     );
-
-    // set the backgroundlayer visible
-    if (conf.cosmeticbackgroundlayer) {
-      layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
-    }
 
     for (col in fields) {
       var obj = {
@@ -1361,6 +1391,7 @@ module.exports = {
     cloud = o.cloud;
     utils = o.utils;
     meta = o.meta;
+    switchLayer = o.switchLayer;
     transformPoint = o.transformPoint;
     backboneEvents = o.backboneEvents;
     return this;
@@ -1704,7 +1735,7 @@ module.exports = {
         // Handle change in service type
         // ==========================
         this.onServiceChange = function (e) {
-          //console.log('select was changed')
+          console.log("select was changed");
 
           //rebuild from metaData
           if ($("#" + select_id).val() != "") {
