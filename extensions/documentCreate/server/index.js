@@ -25,7 +25,7 @@ moment.locale("da_DK");
 
 var BACKEND = config.backend;
 
-const DONTPOST = false;
+const DONTPOST = true;
 const REQCASETYPEID = 44;
 const ADRCASETYPEID = 50;
 const SYNCSOURCE = 24;
@@ -82,6 +82,9 @@ router.post(
     //console.log(req.body.features)
     //console.log(req.body.db)
 
+    //create a pretty BFE number
+    var prettyBFE = req.body.features[0].properties.bfenr + "-BFE";
+
     // check if addresscase is already created
     const qrystr =
       "SELECT adrfileid, parenttype, dnadrid FROM " +
@@ -90,13 +93,14 @@ router.post(
       req.body.features[0].properties.adgangsadresseid +
       "'";
 
-    //    const qrystr = 'INSERT INTO vmr.adressesager (adrfileid, adresseguid) VALUES (108896,\'0a3f50c1-0523-32b8-e044-0003ba298018\')'
+    // const qrystr = 'INSERT INTO vmr.adressesager (adrfileid, adresseguid) VALUES (108896,\'0a3f50c1-0523-32b8-e044-0003ba298018\')'
     var getExistinAdrCaseGc2Promise = ReqToGC2(
       req.session,
       qrystr,
       req.body.db
     );
 
+    // Create a title that looks like OIS (without BFE/ESR)
     var dnTitle = oisAddressFormatter(req.body.features[0].properties.adresse);
 
     //Check for existing cases if so use existing parentid
@@ -175,9 +179,9 @@ router.post(
           // opret adressesag husk post caseid tilbage til gc2
           // getnodeid på henvendelsesmappen
           // opret henvendelsessagen herunder.
-          var getParentCaseDnPromise = getParentCaseDn(
-            req.body.features[0].properties.esrnr
-          );
+
+          // use bfenr
+          var getParentCaseDnPromise = getParentCaseDn(prettyBFE);
 
           getParentCaseDnPromise.then(
             function (result) {
@@ -479,6 +483,8 @@ function createAddressPart(dnTitle, adrguid, ejdnr) {
           },
         ],
       };
+
+      console.log(newContact);
       resolve(newContact);
     });
   });
@@ -492,10 +498,11 @@ function getCaseParts(caseid) {
   return partjson;
 }
 
-function addPartsToCase(esrnr, adrguid, caseId) {
+function addPartsToCase(esrnr, adrguid, caseId, bfe) {
   // get ids for esrnr and adrguid
   var getEsrIdPromise = getPartId(esrnr);
   var getAdrIdPromise = getPartId(adrguid);
+  var getBfeIdPromise = getPartId(esrnr + "-BFE");
 
   //   Promise.all([getEsrIdPromise,getAdrIdPromise]).then(function(values) {
   Promise.all([getEsrIdPromise, getAdrIdPromise]).then(function (values) {
@@ -665,11 +672,11 @@ function oisAddressFormatter(adrString) {
     .concat(" [" + adrSplit[1].trim() + "]");
 }
 
-function getParentCaseDn(esrnr) {
+function getParentCaseDn(prettyBFE) {
   var dnoptions = {
     url:
       "https://docunoteapi.vmr.dk/api/v1/Cases/synchronizeSource/10/synchronizeId/" +
-      esrnr,
+      prettyBFE,
     method: "GET",
     headers: {
       applicationKey: APPKEY,
@@ -680,7 +687,7 @@ function getParentCaseDn(esrnr) {
   return new Promise(function (resolve, reject) {
     request.get(dnoptions, function (err, res, body) {
       if (!err) {
-        //console.log(body)
+        console.log(body);
         //postToGC2(req)
         //return body.parentid;
         resolve(JSON.parse(body));
