@@ -250,7 +250,7 @@ var getExistingDocs = function (key, fileIdent = false) {
 
     // If fileIdent is set, bu no cases are found, show snack
     if (fileIdent && !caseFound) {
-      snack('Sag ' + key + ' - ' + __('ikke fundet'))
+      snack("Sag " + key + " - " + __("ikke fundet"));
       throw new Error("No existing cases found");
     }
   }
@@ -670,7 +670,7 @@ var documentCreateApplyFilter = function (filter) {
   );
 
   if (DClayers.length > 0 && _USERSTR.length > 0) {
-  //if (DClayers.length > 0 && _USERSTR.length > 0 && firstRunner === false) {
+    //if (DClayers.length > 0 && _USERSTR.length > 0 && firstRunner === false) {
     for (let layerKey in filter) {
       console.log(
         "documentCreate - Apply filter to " + layerKey,
@@ -709,17 +709,16 @@ var onSearchLoad = function () {
   resultLayer.clearLayers();
   resultLayer.addLayer(this.layer);
 
-  //this er retur-obj fra DAR evt løft værdi ud i skjult felt adgang is
-  //console.log(this)
+  //this er retur-obj fra GC2.io, så der skal laves opslag til DAWA
   console.log(this.geoJSON.features[0].properties.id);
   filterKey = $("#documentCreate-custom-search").val();
-  //find esrnr + adresseid
+  //find esr, adresseid og mere fra DAWA
   getEjdNr(this.geoJSON.features[0].properties.id);
 
-  config.extensionConfig.documentCreate.tables[0].defaults.adgangsadresseid =
-    this.geoJSON.features[0].properties.id;
-  config.extensionConfig.documentCreate.tables[1].defaults.adgangsadresseid =
-    this.geoJSON.features[0].properties.id;
+  // Debug - for each table, print contents of defaults
+  //for (let l in config.extensionConfig.documentCreate.tables) {
+  //  console.log(config.extensionConfig.documentCreate.tables[l].defaults);
+  //}
 
   //move to marker
   cloud
@@ -748,14 +747,13 @@ var onSearchLoad = function () {
 // kristrupvej 1, https://dawa.aws.dk/adgangsadresser/0a3f5094-b7b0-32b8-e044-0003ba298018
 
 var getEjdNr = function (adgangsadresseid) {
-  var esr;
-  var adresseid;
+  var esr, adresseid, bfe;
   $.ajax({
     url: "https://dawa.aws.dk/adresser?adgangsadresseid=" + adgangsadresseid,
     type: "get",
     async: false,
     success: function (data, status) {
-      //console.log(data)
+      //console.log(data[0]);
       if (data[0].adgangsadresse == null) {
         //nothing.. return null
         return null;
@@ -770,6 +768,7 @@ var getEjdNr = function (adgangsadresseid) {
         esr = komkode.concat(esr);
         adresseid = data[0].id;
 
+        // Handle adresse
         var adresse = $.ajax({
           url: "https://dawa.aws.dk/datavask/adresser?betegnelse=" + filterKey,
           type: "get",
@@ -779,21 +778,40 @@ var getEjdNr = function (adgangsadresseid) {
               //nothing.. return null
               return null;
             } else {
-              //danner esr ejendomsnummer
               var adresse = data.resultater[0].adresse.id;
               return adresse;
             }
           },
         });
+
+        var bfe = $.ajax({
+          url: data[0].adgangsadresse.jordstykke.href,
+          type: "get",
+          async: false,
+          success: function (data, status) {
+            if (data.resultater == null) {
+              //nothing.. return null
+              return null;
+            } else {
+              var bfe = data.bfenummer;
+              return bfe;
+            }
+          },
+        });
+
         if (adresse.responseJSON.resultater.kategori != "C") {
           adresseid = adresse.responseJSON.resultater[0].adresse.id;
         }
-        config.extensionConfig.documentCreate.tables[0].defaults.esrnr = esr;
-        config.extensionConfig.documentCreate.tables[1].defaults.esrnr = esr;
-        config.extensionConfig.documentCreate.tables[0].defaults.adresseid =
-          adresseid;
-        config.extensionConfig.documentCreate.tables[1].defaults.adresseid =
-          adresseid;
+        let bfenr = bfe.responseJSON.bfenummer.toString();
+
+        // Move information out into config
+        for (let l in config.extensionConfig.documentCreate.tables) {
+          config.extensionConfig.documentCreate.tables[l].defaults.esrnr = esr;
+          config.extensionConfig.documentCreate.tables[l].defaults.adresseid =
+            adresseid;
+          config.extensionConfig.documentCreate.tables[l].defaults.bfenr =
+            bfenr;
+        }
 
         return 1;
       }
@@ -1147,11 +1165,13 @@ var FeatureFormFactory = function (order) {
     // Build the UI elements
     ////////////////////////////////////////
     //Hide element if hidden is set
+
     if (col.hidden !== -1) {
       var formobj = '<div class="form-group collapse">';
     } else {
       var formobj = '<div class="form-group">';
     }
+
     //create label for input, colName fallback
     //console.log(col)
     var alias;
