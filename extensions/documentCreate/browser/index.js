@@ -250,7 +250,7 @@ var getExistingDocs = function (key, fileIdent = false) {
 
     // If fileIdent is set, bu no cases are found, show snack
     if (fileIdent && !caseFound) {
-      snack("Sag " + key + " - " + __("ikke fundet"));
+      snack('Sag ' + key + ' - ' + __('ikke fundet'))
       throw new Error("No existing cases found");
     }
   }
@@ -670,7 +670,7 @@ var documentCreateApplyFilter = function (filter) {
   );
 
   if (DClayers.length > 0 && _USERSTR.length > 0) {
-    //if (DClayers.length > 0 && _USERSTR.length > 0 && firstRunner === false) {
+  //if (DClayers.length > 0 && _USERSTR.length > 0 && firstRunner === false) {
     for (let layerKey in filter) {
       console.log(
         "documentCreate - Apply filter to " + layerKey,
