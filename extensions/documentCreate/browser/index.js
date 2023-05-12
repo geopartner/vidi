@@ -747,45 +747,27 @@ var onSearchLoad = function () {
 // kristrupvej 1, https://dawa.aws.dk/adgangsadresser/0a3f5094-b7b0-32b8-e044-0003ba298018
 
 var getEjdNr = function (adgangsadresseid) {
-  var esr, adresseid, bfe;
+  var esr, bfenr;
   $.ajax({
-    url: "https://dawa.aws.dk/adresser?adgangsadresseid=" + adgangsadresseid,
+    url: "https://dawa.aws.dk/adgangsadresser/" + adgangsadresseid,
     type: "get",
     async: false,
     success: function (data, status) {
-      //console.log(data[0]);
-      if (data[0].adgangsadresse == null) {
+      //console.log(data);
+      if (data.id == null) {
         //nothing.. return null
         return null;
       } else {
         //danner esr ejendomsnummer
-        var str = data[0].adgangsadresse.esrejendomsnr;
-        var komkode = data[0].adgangsadresse.kommune.kode.replace(/^0+/, "");
+        var komkode = data.kommune.kode.replace(/^0+/, "");
         esr =
-          new Array(7 - data[0].adgangsadresse.esrejendomsnr.length + 1).join(
+          new Array(7 - data.esrejendomsnr.length + 1).join(
             "0"
-          ) + data[0].adgangsadresse.esrejendomsnr;
+          ) + data.esrejendomsnr;
         esr = komkode.concat(esr);
-        adresseid = data[0].id;
-
-        // Handle adresse
-        var adresse = $.ajax({
-          url: "https://dawa.aws.dk/datavask/adresser?betegnelse=" + filterKey,
-          type: "get",
-          async: false,
-          success: function (data, status) {
-            if (data.resultater == null) {
-              //nothing.. return null
-              return null;
-            } else {
-              var adresse = data.resultater[0].adresse.id;
-              return adresse;
-            }
-          },
-        });
 
         var bfe = $.ajax({
-          url: data[0].adgangsadresse.jordstykke.href,
+          url: data.jordstykke.href,
           type: "get",
           async: false,
           success: function (data, status) {
@@ -799,16 +781,13 @@ var getEjdNr = function (adgangsadresseid) {
           },
         });
 
-        if (adresse.responseJSON.resultater.kategori != "C") {
-          adresseid = adresse.responseJSON.resultater[0].adresse.id;
-        }
-        let bfenr = bfe.responseJSON.bfenummer.toString();
+        bfenr = bfe.responseJSON.bfenummer.toString();
 
         // Move information out into config
         for (let l in config.extensionConfig.documentCreate.tables) {
           config.extensionConfig.documentCreate.tables[l].defaults.esrnr = esr;
-          config.extensionConfig.documentCreate.tables[l].defaults.adresseid =
-            adresseid;
+          config.extensionConfig.documentCreate.tables[l].defaults.adgangsadresseid =
+            adgangsadresseid;
           config.extensionConfig.documentCreate.tables[l].defaults.bfenr =
             bfenr;
         }
