@@ -246,12 +246,14 @@ module.exports = {
      */
     var dict = {
       Info: {
-        da_DK: "infoDK",
-        en_US: "infoUS",
+        da_DK:
+          "BlueIdea / Lukkeliste er et modul der hjælper med at finde relevante adresser til en lukning. Du kan tegne et område på kortet, og få en liste over adresser i området. Du kan også udpege et punkt på ledningsnettet, og få en liste af adresser der er forbundet til det punkt. Listerne med adresser kan derefter bruges til at sende beskeder ud med BlueIdea (Kræver aftale med BlueIdea).",
+        en_US:
+          "BlueIdea / Valve list is a module that helps to find relevant addressess for a valve closure. You can draw an area on the map, and get a list of addresses in the area. You can also select a point on the network, and get a list of addresses connected to that point. The lists of addresses can then be used to send messages with BlueIdea (Requires agreement with BlueIdea).",
       },
       "Plugin Tooltip": {
-        da_DK: "BlueIdea",
-        en_US: "BlueIdea",
+        da_DK: "BlueIdea / Lukkeliste",
+        en_US: "BlueIdea / Valve list",
       },
       MissingLogin: {
         da_DK:
@@ -1331,7 +1333,7 @@ module.exports = {
       __("Plugin Tooltip"),
       __("Info"),
       require("./../../../browser/modules/height")().max,
-      "smartphone",
+      "timeline",
       false,
       exId
     );
