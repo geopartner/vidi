@@ -102,6 +102,7 @@ var cloud;
 var bufferItems = new L.FeatureGroup();
 var queryMatrs = new L.FeatureGroup();
 var queryVentils = new L.FeatureGroup();
+var selectedPoint = new L.FeatureGroup();
 
 var _clearBuffer = function () {
   bufferItems.clearLayers();
@@ -112,11 +113,15 @@ var _clearMatrs = function () {
 var _clearVentil = function () {
   queryVentils.clearLayers();
 };
+var _clearSelectedPoint = function () {
+  selectedPoint.clearLayers();
+};
 
 var _clearAll = function () {
   _clearBuffer();
   _clearMatrs();
   _clearVentil();
+  _clearSelectedPoint();
 };
 
 const MAXFEATURES = 500;
@@ -229,7 +234,7 @@ module.exports = {
     mapObj.addLayer(bufferItems);
     mapObj.addLayer(queryMatrs);
     mapObj.addLayer(queryVentils);
-
+    mapObj.addLayer(selectedPoint);
     /**
      *
      */
@@ -867,6 +872,17 @@ module.exports = {
       }
 
       /**
+       * Styles and adds the selected point to the map
+       */
+      addSelectedPointToMap(point) {
+        try {
+          var marker = L.marker(point).addTo(selectedPoint);
+        } catch (error) {
+          console.warn(error, point);
+        }
+      }
+
+      /**
        * Creates a new snackbar
        * @param {*} text
        */
@@ -1040,10 +1056,13 @@ module.exports = {
                     results_ventiler: data.ventiler.features,
                   });
                 }
+
+                // Add the clicked point to the map
+                me.addSelectedPointToMap(point);
               }
             })
             .catch((error) => {
-              //console.debug(error);
+              console.warn(error);
             });
         });
       };
