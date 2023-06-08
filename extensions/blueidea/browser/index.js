@@ -1316,16 +1316,18 @@ module.exports = {
       downloadVentiler = () => {
         let me = this;
 
+        console.log(me.state.results_ventiler, me.state.user_ventil_export);
+
         // Use keys as headers
         let csvRows = [];
-        csvRows.push(Object.keys(me.state.user_ventil_export.structure));
+        csvRows.push(Object.keys(me.state.user_ventil_export));
 
         // for each feature in results_ventiler, append to csvRows with the values from the user_ventil_export
         for (let index in me.state.results_ventiler) {
           let feature = me.state.results_ventiler[index].properties;
 
           // create a row, using the values from the user_ventil_export
-          let columns = Object.values(me.state.user_ventil_export.structure);
+          let columns = Object.values(me.state.user_ventil_export);
           let row = [];
 
           // Add values to row
