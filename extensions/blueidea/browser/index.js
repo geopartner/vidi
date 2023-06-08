@@ -1027,7 +1027,10 @@ module.exports = {
 
                 // if the results contains a list of matrikler, run them through the queryAdresser function
                 if (data.matrikler) {
-                  me.queryAddresses(data.matrikler);
+                  // only if blueidea is allowed
+                  if (me.allowBlueIdea()) {
+                    me.queryAddresses(data.matrikler);
+                  }
                 }
 
                 if (data.ventiler) {
