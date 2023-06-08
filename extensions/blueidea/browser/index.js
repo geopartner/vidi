@@ -162,8 +162,8 @@ var styleObject = {
     fillOpacity: 0.8,
   },
   selectedLedning: {
-    color: "#ff7800",
-    weight: 1,
+    color: "#AA4A44",
+    weight: 4,
   },
   selectedPoint: {},
   matrikel: {
@@ -1090,14 +1090,6 @@ module.exports = {
                   }
                 }
 
-                if (data.ventiler) {
-                  //console.debug("Got ventiler:", data.ventiler);
-                  me.addVentilerToMap(data.ventiler);
-                  me.setState({
-                    results_ventiler: data.ventiler.features,
-                  });
-                }
-
                 if (data.ledninger) {
                   //console.debug("Got ledninger:", data.ledninger);
                   me.addSelectedLedningerToMap(data.ledninger);
@@ -1110,6 +1102,14 @@ module.exports = {
                 if (data.log) {
                   //console.debug("Got log:", data.log);
                   me.addSelectedPointToMap(data.log);
+                }
+
+                if (data.ventiler) {
+                  //console.debug("Got ventiler:", data.ventiler);
+                  me.addVentilerToMap(data.ventiler);
+                  me.setState({
+                    results_ventiler: data.ventiler.features,
+                  });
                 }
               }
             })
