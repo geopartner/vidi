@@ -135,11 +135,51 @@ const resetObj = {
   authed: false,
   user_id: null,
   user_lukkeliste: false,
+  user_blueidea: false,
   user_db: false,
   user_ventil_layer: null,
   user_udpeg_layer: null,
   user_ventil_layer_key: null,
   user_ventil_export: null,
+};
+
+// This element contains the styling for the module
+var styleObject = {
+  ventil_forbundet: {
+    radius: 8,
+    fillColor: "#00ff00",
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8,
+  },
+  ventil: {
+    radius: 5,
+    fillColor: "#ff7800",
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8,
+  },
+  selectedLedning: {
+    color: "#ff7800",
+    weight: 1,
+  },
+  selectedPoint: {},
+  matrikel: {
+    color: "#000000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.2,
+    dashArray: "5,3",
+  },
+  buffer: {
+    color: "#ff7800",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.1,
+    dashArray: "5,3",
+  },
 };
 
 /**
@@ -811,13 +851,7 @@ module.exports = {
        */
       addBufferToMap(geojson) {
         try {
-          var l = L.geoJSON(geojson, {
-            color: "#ff7800",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.1,
-            dashArray: "5,3",
-          }).addTo(bufferItems);
+          var l = L.geoJSON(geojson, styleObject.buffer).addTo(bufferItems);
         } catch (error) {
           console.warn(error, geojson);
         }
@@ -828,13 +862,7 @@ module.exports = {
        */
       addMatrsToMap(geojson) {
         try {
-          var l = L.geoJSON(geojson, {
-            color: "#000000",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.2,
-            dashArray: "5,3",
-          }).addTo(queryMatrs);
+          var l = L.geoJSON(geojson, styleObject.matrikel).addTo(queryMatrs);
         } catch (error) {
           console.warn(error, geojson);
         }
@@ -852,25 +880,11 @@ module.exports = {
               // if the feature has a forbundet property, use a different icon
               if (feature.properties.forbundet) {
                 // //console.debug(feature.properties, latlng);
-                return L.circleMarker(latlng, {
-                  radius: 8,
-                  fillColor: "#00ff00",
-                  color: "#000",
-                  weight: 1,
-                  opacity: 1,
-                  fillOpacity: 0.8,
-                });
+                return L.circleMarker(latlng, styleObject.ventil_forbundet);
               }
 
               // else, use the default icon
-              return L.circleMarker(latlng, {
-                radius: 5,
-                fillColor: "#ff7800",
-                color: "#000",
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8,
-              });
+              return L.circleMarker(latlng, styleObject.ventil);
             },
           }).addTo(queryVentils);
         } catch (error) {
@@ -883,10 +897,9 @@ module.exports = {
        */
       addSelectedLedningerToMap(geojson) {
         try {
-          var l = L.geoJSON(geojson, {
-            color: "#ff7800",
-            weight: 1,
-          }).addTo(seletedLedninger);
+          var l = L.geoJSON(geojson, styleObject.selectedLedning).addTo(
+            seletedLedninger
+          );
         } catch (error) {
           console.warn(error, geojson);
         }
@@ -895,9 +908,16 @@ module.exports = {
       /**
        * Styles and adds the selected point to the map
        */
-      addSelectedPointToMap(point) {
+      addSelectedPointToMap(geojson) {
         try {
-          var marker = L.marker(point).addTo(selectedPoint);
+          var l = L.geoJSON(geojson, {
+            pointToLayer: function (feature, latlng) {
+              // //console.debug(feature.properties, latlng);
+
+              // else, use the default icon
+              return L.circleMarker(latlng, styleObject.ventil_forbundet);
+            },
+          }).addTo(selectedPoint);
         } catch (error) {
           console.warn(error, point);
         }
@@ -1060,7 +1080,7 @@ module.exports = {
             .then((data) => {
               // if the server returns a result, show it
               if (data) {
-                //console.debug(data);
+                console.debug(data);
 
                 // if the results contains a list of matrikler, run them through the queryAdresser function
                 if (data.matrikler) {
@@ -1087,7 +1107,10 @@ module.exports = {
                 }
 
                 // Add the clicked point to the map
-                me.addSelectedPointToMap(point);
+                if (data.log) {
+                  //console.debug("Got log:", data.log);
+                  me.addSelectedPointToMap(data.log);
+                }
               }
             })
             .catch((error) => {

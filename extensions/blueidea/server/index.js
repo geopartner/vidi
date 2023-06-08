@@ -108,6 +108,7 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
     SQLAPI("select * from lukkeliste.beregn_ventiler limit 1", req),
     SQLAPI("select * from lukkeliste.beregn_afskaaretmatrikler limit 1", req),
     SQLAPI("select * from lukkeliste.beregn_afskaaretnet limit 1", req),
+    SQLAPI("select * from lukkeliste.beregnlog limit 1", req),
   ];
   Promise.all(validate)
     .then((res) => {
@@ -214,11 +215,11 @@ router.post(
       return;
     }
 
-    // remove timeout
-    req.setTimeout(0);
+    // set timeout to 30s
+    req.setTimeout(30000);
 
     // create the string we need to query the database
-    q = `SELECT lukkeliste.fnc_dan_lukkeliste(ST_Transform(ST_GeomFromEWKT('SRID=4326;Point(${req.body.lng} ${req.body.lat})'),25832)::geometry, false)`;
+    q = `SELECT lukkeliste.fnc_dan_lukkeliste(ST_Transform(ST_GeomFromEWKT('SRID=4326;Point(${req.body.lng} ${req.body.lat})'),25832)::geometry, false, '${req.session.screenName}')`;
 
     SQLAPI(q, req)
       .then((uuid) => {
@@ -267,21 +268,36 @@ router.post(
           )
         );
 
-        // when promises are complete, return the result
-        Promise.all(promises).then((res) => {
-          // if matrikler is over 500, count it as an error
-          if (res[1].features.length > MAXFEATURES) {
-            res[0] = {
-              error: `Der er fundet mere end ${MAXFEATURES} matrikler (${res[1].features.length}), der skal lukkes. Kontakt venligst en af vores medarbejdere.`,
-            };
-          }
+        // get log
+        promises.push(
+          SQLAPI(
+            `SELECT * from lukkeliste.beregnlog where beregnuuid = '${beregnuuid}'`,
+            req,
+            { format: "geojson", srs: 4326 }
+          )
+        );
 
-          response.status(200).json({
-            ventiler: res[0],
-            matrikler: res[1],
-            ledninger: res[2],
+        // when promises are complete, return the result
+        Promise.all(promises)
+          .then((res) => {
+            // if afskaaretmatrikler is over 500, count it as an error
+            if (res[1].features.length > MAXFEATURES) {
+              res[0] = {
+                error: `Der er fundet mere end ${MAXFEATURES} matrikler (${res[1].features.length}), der skal lukkes. Kontakt venligst en af vores medarbejdere.`,
+              };
+            }
+
+            response.status(200).json({
+              ventiler: res[0],
+              matrikler: res[1],
+              ledninger: res[2],
+              log: res[3],
+            });
+          })
+          .catch((err) => {
+            console.error(err);
+            response.status(500).json(err);
           });
-        });
       })
       .catch((err) => {
         console.error(err);

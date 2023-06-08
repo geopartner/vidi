@@ -94,3 +94,4 @@ Den bruger der tænkes at bruge lukkeliste-værktøjerne skal have en rolle med 
 - `lukkeliste.beregn_ventiler`
 - `lukkeliste.beregn_afskaaretmatrikler`
 - `lukkeliste.beregn_afskaaretnet`
+- `lukkeliste.beregn_log`
