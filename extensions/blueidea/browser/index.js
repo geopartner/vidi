@@ -103,6 +103,7 @@ var bufferItems = new L.FeatureGroup();
 var queryMatrs = new L.FeatureGroup();
 var queryVentils = new L.FeatureGroup();
 var selectedPoint = new L.FeatureGroup();
+var seletedLedninger = new L.FeatureGroup();
 
 var _clearBuffer = function () {
   bufferItems.clearLayers();
@@ -116,12 +117,16 @@ var _clearVentil = function () {
 var _clearSelectedPoint = function () {
   selectedPoint.clearLayers();
 };
+var _clearSeletedLedninger = function () {
+  seletedLedninger.clearLayers();
+};
 
 var _clearAll = function () {
   _clearBuffer();
   _clearMatrs();
   _clearVentil();
   _clearSelectedPoint();
+  _clearSeletedLedninger();
 };
 
 const MAXFEATURES = 500;
@@ -235,6 +240,8 @@ module.exports = {
     mapObj.addLayer(queryMatrs);
     mapObj.addLayer(queryVentils);
     mapObj.addLayer(selectedPoint);
+    mapObj.addLayer(seletedLedninger);
+
     /**
      *
      */
@@ -872,6 +879,20 @@ module.exports = {
       }
 
       /**
+       * Styles and adds ledninger to the map
+       */
+      addSelectedLedningerToMap(geojson) {
+        try {
+          var l = L.geoJSON(geojson, {
+            color: "#ff7800",
+            weight: 1,
+          }).addTo(seletedLedninger);
+        } catch (error) {
+          console.warn(error, geojson);
+        }
+      }
+
+      /**
        * Styles and adds the selected point to the map
        */
       addSelectedPointToMap(point) {
@@ -1054,6 +1075,14 @@ module.exports = {
                   me.addVentilerToMap(data.ventiler);
                   me.setState({
                     results_ventiler: data.ventiler.features,
+                  });
+                }
+
+                if (data.ledninger) {
+                  //console.debug("Got ledninger:", data.ledninger);
+                  me.addSelectedLedningerToMap(data.ledninger);
+                  me.setState({
+                    results_ledninger: data.ledninger.features,
                   });
                 }
 

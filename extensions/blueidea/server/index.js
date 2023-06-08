@@ -107,6 +107,7 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
   let validate = [
     SQLAPI("select * from lukkeliste.beregn_ventiler limit 1", req),
     SQLAPI("select * from lukkeliste.beregn_afskaaretmatrikler limit 1", req),
+    SQLAPI("select * from lukkeliste.beregn_afskaaretnet limit 1", req),
   ];
   Promise.all(validate)
     .then((res) => {
@@ -257,6 +258,15 @@ router.post(
           )
         );
 
+        // get ledninger
+        promises.push(
+          SQLAPI(
+            `SELECT * from lukkeliste.beregn_afskaaretnet where beregnuuid = '${beregnuuid}'`,
+            req,
+            { format: "geojson", srs: 4326 }
+          )
+        );
+
         // when promises are complete, return the result
         Promise.all(promises).then((res) => {
           // if matrikler is over 500, count it as an error
@@ -269,6 +279,7 @@ router.post(
           response.status(200).json({
             ventiler: res[0],
             matrikler: res[1],
+            ledninger: res[2],
           });
         });
       })
