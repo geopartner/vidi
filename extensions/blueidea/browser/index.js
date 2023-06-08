@@ -317,6 +317,10 @@ module.exports = {
         da_DK: "Download ventil-liste",
         en_US: "Download valve list",
       },
+      NotAllowedBlueIdea: {
+        da_DK: "Du har ikke adgang til BlueIdea",
+        en_US: "You are not allowed to use BlueIdea",
+      },
     };
 
     /**
@@ -379,7 +383,8 @@ module.exports = {
           results_adresser: {},
           results_matrikler: [],
           results_ventiler: [],
-          user_lukkeliste: false,
+          user_lukkeliste: null,
+          user_blueidea: null,
           user_id: null,
           user_profileid: null,
           user_db: false,
@@ -452,11 +457,18 @@ module.exports = {
             .finally(() => {
               // If logged in, and user_id is not null, show buttons
               if (me.state.authed && me.state.user_id) {
-                $("#_draw_make_blueidea_with_selected").show();
-                $("#_draw_make_blueidea_with_all").show();
+                // If user has blueidea, show buttons
+                if (me.state.user_blueidea == true) {
+                  $("#_draw_make_blueidea_with_selected").show();
+                  $("#_draw_make_blueidea_with_all").show();
+                } else {
+                  $("#_draw_make_blueidea_with_selected").hide();
+                  $("#_draw_make_blueidea_with_all").hide();
+                }
                 // TODO: Disabled for now, but lists templates
                 //this.getTemplates();
               } else {
+                // If not logged in, hide buttons
                 $("#_draw_make_blueidea_with_selected").hide();
                 $("#_draw_make_blueidea_with_all").hide();
               }
@@ -507,9 +519,10 @@ module.exports = {
                 config.extensionConfig.blueidea.userid,
               type: "GET",
               success: function (data) {
-                //console.debug("Got user", data);
+                console.log("Got user", data);
                 me.setState({
-                  user_lukkeliste: data.lukkeliste || false,
+                  user_lukkeliste: data.lukkeliste,
+                  user_blueidea: data.blueidea,
                   user_id: config.extensionConfig.blueidea.userid,
                   user_profileid: data.profileid || null,
                   user_db: data.db || false,
@@ -899,6 +912,13 @@ module.exports = {
           profileId: this.state.profileId || null,
         };
 
+        // if blueidea is false, return
+        if (!this.state.user_blueidea) {
+          // show error in snackbar
+          this.createSnack(__("NotAllowedBlueIdea"));
+          return;
+        }
+
         // take the curent list of addresses and create an array of objects containing the kvhx
         let keys = Object.keys(this.state.results_adresser);
         let adresser = keys.map((kvhx) => {
@@ -1065,7 +1085,8 @@ module.exports = {
       };
 
       /**
-       * Determines if the plugin is ready to send data to blueidea
+       * Determines if the plugin is ready after getting results
+       * @returns boolean
        */
       readyToSend = () => {
         // if adresse array is not empty, return true
@@ -1077,10 +1098,36 @@ module.exports = {
       };
 
       /**
+       * Determines if the result is ready to be sent to blueidea
+       * @returns boolean
+       */
+      readyToBlueIdea = () => {
+        // if readyToSend is true, and blueidea is true, return true
+        if (this.readyToSend() && this.allowBlueIdea()) {
+          return true;
+        } else {
+          return false;
+        }
+      };
+
+      /**
        * Determines if lukkeliste is allowed
+       * @returns boolean
        */
       allowLukkeliste = () => {
-        if (this.state.user_lukkeliste && this.state.user_db) {
+        if (this.state.user_lukkeliste == true && this.state.user_db == true) {
+          return true;
+        } else {
+          return false;
+        }
+      };
+
+      /**
+       * Determines if blueidea is allowed
+       * @returns boolean
+       */
+      allowBlueIdea = () => {
+        if (this.state.user_blueidea == true) {
           return true;
         } else {
           return false;
@@ -1089,6 +1136,7 @@ module.exports = {
 
       /**
        * Determines if ventiler can be downloaded
+       * @returns boolean
        */
       allowVentilDownload = () => {
         let me = this;
@@ -1234,6 +1282,7 @@ module.exports = {
                       size="large"
                       variant="contained"
                       style={{ margin: "10px" }}
+                      disabled={!this.allowBlueIdea()}
                     >
                       {__("Draw area")}
                     </Button>
@@ -1280,7 +1329,7 @@ module.exports = {
                     size="large"
                     variant="contained"
                     style={{ margin: "10px" }}
-                    disabled={!this.readyToSend()}
+                    disabled={!this.readyToBlueIdea()}
                   >
                     {__("Go to blueidea")}
                   </Button>

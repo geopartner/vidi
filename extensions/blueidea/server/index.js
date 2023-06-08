@@ -74,14 +74,33 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
   // Get user from config
   var user = bi.users[req.params.userid];
 
+  //console.log(user);
+
+  // guard against missing mandatory properties
+
+  // if blueidea is set, and is true, check for username and password
+  if (user.hasOwnProperty("blueidea") && user.blueidea) {
+    if (!user.hasOwnProperty("username") || !user.hasOwnProperty("password")) {
+      response.status(500).send("Missing username or password");
+      return;
+    }
+  }
+
+  // if check if blueidea and lukke liste is set
+  if (!user.hasOwnProperty("blueidea") || !user.hasOwnProperty("lukkeliste")) {
+    response.status(500).send("Missing blueidea or lukkeliste");
+    return;
+  }
+
   returnobj = {
     profileid: user.profileid ? user.profileid : null,
-    lukkeliste: user.lukkeliste ? user.lukkeliste : false,
+    lukkeliste: user.lukkeliste,
+    blueidea: user.blueidea,
     ventil_layer: user.ventil_layer ? user.ventil_layer : null,
     ventil_layer_key: user.ventil_layer_key ? user.ventil_layer_key : null,
     udpeg_layer: user.udpeg_layer ? user.udpeg_layer : null,
     ventil_export: user.ventil_export ? user.ventil_export : null,
-    debug: user.debug ? user.debug : false
+    debug: user.debug ? user.debug : null,
   };
 
   // Check if the database is correctly setup, and the session is allowed to access it
