@@ -612,7 +612,7 @@ module.exports = {
 
                 return merged;
               } catch (error) {
-                //console.debug(error);
+                console.warn(error);
               }
             })
             .then((matrikler) => {
@@ -644,7 +644,7 @@ module.exports = {
               return;
             });
         } catch (error) {
-          //console.debug(error);
+          console.warn(error);
           this.createSnack(error);
           return;
         }
@@ -683,7 +683,7 @@ module.exports = {
                   units: "meters",
                 });
               } catch (error) {
-                //console.debug(error, feature);
+                console.warn(error, feature);
               }
             } else {
               buffered = turfBuffer(feature, exBufferDistance, {
@@ -693,7 +693,7 @@ module.exports = {
 
             collection.features.push(buffered);
           } catch (error) {
-            //console.debug(error, feature);
+            console.warn(error, feature);
           }
         }
 
@@ -728,6 +728,23 @@ module.exports = {
               results[i].features.length > 0
             ) {
               for (let j = 0; j < results[i].features.length; j++) {
+                // If the matrikel is a litra - starts with 7000, ignore it in the list
+                if (
+                  results[i].features[j].properties.matrikelnr.startsWith(
+                    "7000"
+                  )
+                ) {
+                  continue;
+                }
+
+                // If the matikel has a registreretarel that is equal to vejareal, ignore it in the list
+                if (
+                  results[i].features[j].properties.registreretareal ==
+                  results[i].features[j].properties.vejareal
+                ) {
+                  continue;
+                }
+
                 let feature = results[i].features[j];
                 merged[feature.properties.featureid] = feature;
               }
@@ -736,7 +753,7 @@ module.exports = {
           let newCollection = turfFeatureCollection(Object.values(merged));
           return newCollection;
         } catch (error) {
-          //console.debug(error);
+          console.warn(error);
         }
       }
 
@@ -760,7 +777,7 @@ module.exports = {
           }
           return merged;
         } catch (error) {
-          console.log(error);
+          console.warn(error);
           return [];
         }
       }
@@ -777,7 +794,7 @@ module.exports = {
             dashArray: "5,3",
           }).addTo(bufferItems);
         } catch (error) {
-          //console.debug(error, geojson);
+          console.warn(error, geojson);
         }
       }
 
@@ -794,7 +811,7 @@ module.exports = {
             dashArray: "5,3",
           }).addTo(queryMatrs);
         } catch (error) {
-          //console.debug(error, geojson);
+          console.warn(error, geojson);
         }
       }
 
@@ -832,7 +849,7 @@ module.exports = {
             },
           }).addTo(queryVentils);
         } catch (error) {
-          //console.debug(error, geojson);
+          console.warn(error, geojson);
         }
       }
 
