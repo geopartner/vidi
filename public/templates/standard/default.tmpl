@@ -442,6 +442,12 @@
                                 </button>
                                 <div id="draw-table"></div>
 
+                                <button id="_draw_upload_shape_btn" class="btn btn-sm btn-raised" for="_draw_upload_shape_file"  title="Upload shape zip file" style="display:inline" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-upload" aria-hidden="true"></i><p style="margin-right:10px;display:inline;"> Shape</p>
+                                    <input id="_draw_upload_shape_file"  style="display:none;" type="file"  accept-language  accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed" >                                
+                                </button>
+                                <label id="_draw_upload_shape_error" style="font-size:12px;"></label>
+
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="state-snapshots-content">
                                 <div class="help-btn" onclick="javascript:createAlert($(this), '{{StateSnapshots description}}')">
