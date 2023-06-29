@@ -38,7 +38,9 @@ module.exports = {
     },
 
     init: () => {
-
+        $("#_draw_zoom_btn").on('click', ()=> {
+            _self.zoomToLayer();
+        });
         $("#_draw_download_geojson").click(function () {
             _self.download();
         });
@@ -130,7 +132,13 @@ module.exports = {
             }
         }());
     },
-
+    zoomToLayer : () => {
+      const items=  _self.getDrawItems();
+      if (!items) 
+        return;
+      const bounds= items.getBounds();
+      cloud.get().map.fitBounds(bounds,true);
+    },	
     makeConflictSearchWithSelected: () => {
         if (!selectedDrawing) {
             alert("Vælg en tegning")
