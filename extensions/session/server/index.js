@@ -119,7 +119,7 @@ router.post('/api/session/start', function (req, response) {
 router.get('/api/session/stop', function (req, response) {
     console.log("Session stopped");
     req.session.destroy(function () {
-        response.cookie('connect.gc2', '', {maxAge: 1})
+        response.cookie('connect.gc2', '', {maxAge: -1})
         response.cookie('autoconnect.gc2', '', {maxAge: -1})
         response.status(200).send({
             success: true,
