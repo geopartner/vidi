@@ -9,6 +9,7 @@ let router = express.Router();
 let request = require('request');
 let config = require('../../../config/config.js');
 let autoLogin = false; // Auto login is insecure and sets cookie with login creds. DO NOT USE
+const autoConnectCookie = 'autoconnect.gc2';
 let autoLoginMaxAge = null;
 
 if (config?.autoLoginPossible === true) {
@@ -29,7 +30,7 @@ if (config?.autoLoginPossible === true) {
 
 let start = function (dataToAuthorizeWith, req, response, status) {
     let options = {
-        headers: {'content-type': 'application/json'},
+        headers: { 'content-type': 'application/json' },
         method: 'POST',
         uri: config.gc2.host + "/api/v2/session/start",
         body: JSON.stringify(dataToAuthorizeWith)
@@ -79,7 +80,7 @@ let start = function (dataToAuthorizeWith, req, response, status) {
         req.session.parentDb = data.parentdb;
         req.session.properties = data.properties;
 
-        console.log("Session started.","User:",data.screen_name,"Database:",data.parentdb,"Has autologin:",autoLogin,autoLoginMaxAge);
+        console.log("Session started.", "User:", data.screen_name, "Database:", data.parentdb, "Has autologin:", autoLogin, autoLoginMaxAge);
 
         let resBody = {
             success: true,
@@ -96,10 +97,14 @@ let start = function (dataToAuthorizeWith, req, response, status) {
         if (autoLogin && !isNaN(autoLoginMaxAge)) {
             resBody.password = dataToAuthorizeWith.password;
             resBody.schema = dataToAuthorizeWith.schema;
-            response.cookie('autoconnect.gc2', JSON.stringify(resBody), {
+            response.cookie(autoConnectCookie, JSON.stringify(resBody), {
                 maxAge: autoLoginMaxAge,
                 httpOnly: true
             });
+        }
+        if (!autoLogin) {
+            response.cookie(autoConnectCookie, '', {maxAge: -1});
+            console.log(autoConnectCookie + " removed");
         }
 
         if (status) {
@@ -119,8 +124,8 @@ router.post('/api/session/start', function (req, response) {
 router.get('/api/session/stop', function (req, response) {
     console.log("Session stopped");
     req.session.destroy(function () {
-        response.cookie('connect.gc2', '', {maxAge: -1})
-        response.cookie('autoconnect.gc2', '', {maxAge: -1})
+        response.cookie('connect.gc2', '', { maxAge: -1 })
+        response.cookie(autoConnectCookie, '', { maxAge: -1 })
         response.status(200).send({
             success: true,
             message: "Logged out"
@@ -129,20 +134,19 @@ router.get('/api/session/stop', function (req, response) {
 });
 
 router.get('/api/session/status', function (req, response) {
-    // console.log(req.url, req.cookies)
-    let autoLoginCookie = req.cookies['autoconnect.gc2'];
-    /*
-    if (autoLogin == false && req.query.autoLogin)
-        autoLogin = req.query.autoLogin;
+
+    let autoLoginCookie = req.cookies[autoConnectCookie];
     
-    if (req.query.autoLoginMaxAge)
-        autoLoginMaxAge = req.query.autoLoginMaxAge;
-    */
-    if (autoLogin === false && typeof req.query.autoLogin !== "undefined")
-        autoLogin = req.query.autoLogin === "true" ? true: false;
-    
-    if (typeof  req.query.autoLoginMaxAge  !== "undefined")
+    if (autoLogin === false && req.query.autoLogin) {
+        autoLogin = req.query.autoLogin === "true" ? true : false;
+    }
+    if (req.query.autoLoginMaxAge) {
         autoLoginMaxAge = typeof parseInt(req.query.autoLoginMaxAge) === "number" ? parseInt(req.query.autoLoginMaxAge) : 2629800000; // Eller hvad nu default skal være. (1 måned)
+    }
+    //hvis autoLogin ikke længere er true og der findes en autoconnect.gc2. Slet coockie
+    if (!autoLogin  && autoLoginCookie) {
+        response.cookie(autoConnectCookie, '', {maxAge: -1});
+    }       
 
     if (autoLogin && autoLoginCookie && !req.session.gc2SessionId) {
         let creds = JSON.parse(autoLoginCookie);
