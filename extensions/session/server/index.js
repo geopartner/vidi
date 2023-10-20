@@ -50,7 +50,16 @@ let start = function (dataToAuthorizeWith, req, response, status) {
             });
             return;
         }
-
+        
+        if (!autoLogin) {
+            try{
+              res.cookie(autoConnectCookie, '', {maxAge: -1});
+              console.log(autoConnectCookie + " removed");
+            } catch (e){
+                console.log(autoConnectCookie + " not removed");
+            }
+            
+        }
         try {
             data = JSON.parse(body);
         } catch (e) {
@@ -102,10 +111,7 @@ let start = function (dataToAuthorizeWith, req, response, status) {
                 httpOnly: true
             });
         }
-        if (!autoLogin) {
-            response.cookie(autoConnectCookie, '', {maxAge: -1});
-            console.log(autoConnectCookie + " removed");
-        }
+      
 
         if (status) {
             resBody.status = status;
@@ -145,7 +151,12 @@ router.get('/api/session/status', function (req, response) {
     }
     //hvis autoLogin ikke længere er true og der findes en autoconnect.gc2. Slet coockie
     if (!autoLogin  && autoLoginCookie) {
-        response.cookie(autoConnectCookie, '', {maxAge: -1});
+        try{
+          response.cookie(autoConnectCookie, '', { maxAge: -1 })
+          response.clearCookie(autoConnectCookie)
+        }  catch(e) {
+            console.log(e);
+        }
     }       
 
     if (autoLogin && autoLoginCookie && !req.session.gc2SessionId) {

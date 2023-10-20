@@ -2157,18 +2157,18 @@ module.exports = {
         {
             "embed": ["index"]
         },
-        // {
-        //     "documentCreate": ["index"]
-        // },
+        {
+            "documentCreate": ["index"]
+        },
         {
             "graveAssistent": ["index"]
         },
-        // {
-        //     "geosag": ["index"]
-        // },
-        // {
-        //     "blueidea": ["index"]
-        // }
+        {
+            "geosag": ["index"]
+        },
+        {
+            "blueidea": ["index"]
+        }
         /*,
             {
                 "MapGOMenu": ["index", "reportRender", "infoClick", "controller"]
@@ -2181,18 +2181,18 @@ module.exports = {
         {
             "session": ["index"]
         },
-        // {
-        //     "documentCreate": ["index"]
-        // },
+        {
+            "documentCreate": ["index"]
+        },
         {
             "graveAssistent": ["index"]
         },
-        // {
-        //     "geosag": ["index"]
-        // },
-        // {
-        //     "blueidea": ["index"]
-        // }
+        {
+            "geosag": ["index"]
+        },
+        {
+            "blueidea": ["index"]
+        }
         /*,
             {
                 "MapGOMenu": ["index"]
