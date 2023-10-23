@@ -1039,8 +1039,8 @@ module.exports = {
                                 var [status, consolidated] = files
 
                                 return [Promise.all([
-                                    pushStatus(status, statusKey),
-                                    pushForespoergsel(consolidated, statusKey)
+                                    pushStatus(status, statusKey, schema_override),
+                                    pushForespoergsel(consolidated, statusKey, schema_override)
                                 ]),consolidated.forespNummer]
                             }).then(function(files) {
                                 //console.log(files)
