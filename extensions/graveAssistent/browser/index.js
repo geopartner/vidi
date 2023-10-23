@@ -23,6 +23,18 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 
+// Get information from config.json
+
+var schema_override = null;
+
+if (window.config?.extensionConfig?.graveAssistent) {
+    if (window.config?.extensionConfig?.graveAssistent?.schema) {
+        schema_override = window.config.extensionConfig.graveAssistent.schema;
+    }
+}
+
+console.log('Schema override:', schema_override)
+
 
 /**
  *
@@ -624,8 +636,9 @@ module.exports = {
 
                 }
 
-                var pushForespoergsel = function (obj, statusKey) {
+                var pushForespoergsel = function (obj, statusKey, schema_override) {
                     obj['statusKey'] = statusKey
+                    obj['schema'] = schema_override
                     let opts = {
                         headers: {
                             'Accept': 'application/json',
@@ -698,10 +711,11 @@ module.exports = {
                     });
                 }
 
-                var pushStatus = function (obj, statusKey) {
+                var pushStatus = function (obj, statusKey, schema_override) {
                     let postData = {
                         Ledningsejerliste: obj,
-                        statusKey: statusKey
+                        statusKey: statusKey,
+                        schema: schema_override
                     }
                     let opts = {
                         headers: {
@@ -884,7 +898,7 @@ module.exports = {
 
                                     if (me.state.authed) {
                                         me.populateDClayers()
-                                        me.populateForespoergselOption() //
+                                        me.populateForespoergselOption(schema_override) //
                                     }
                                 }))
                                 .catch(e => me.setState({
@@ -949,7 +963,7 @@ module.exports = {
                             svarUploadTime: '',
                             ejerliste: [],
                         }, () => {
-                            _self.populateForespoergselOption() // On back click, populate select with new foresp
+                            _self.populateForespoergselOption(schema_override) // On back click, populate select with new foresp
                             // move to last location and clear filters
                             cloud.get().map.fitBounds(_self.state.lastBounds)
                             clearFilters()
@@ -962,7 +976,7 @@ module.exports = {
                             foresp: String(event.target.value),
                             lastBounds: cloud.get().map.getBounds()
                         })
-                        _self.getForespoergsel(String(event.target.value))
+                        _self.getForespoergsel(String(event.target.value), schema_override)
                         _self.setState({
                             done: true
                         })
@@ -1038,7 +1052,7 @@ module.exports = {
                                     done: true,
                                     foresp: String(files[1])
                                 })
-                                _self.getForespoergsel(String(files[1]))
+                                _self.getForespoergsel(String(files[1]), schema_override)
                             })
                             .catch(e => {
                                 console.log(e)
@@ -1075,16 +1089,21 @@ module.exports = {
 
                     /**
                      * Populate the forsp-select with foresp currently saved in schema
+                     * @param {*} schema - if set, use override with this schema
                      */
-                    populateForespoergselOption() {
+                    populateForespoergselOption(schema = null) {
                         var _self = this;
                         let opts = {
                             headers: {
                                 'Accept': 'application/json',
                                 'Content-Type': 'application/json'
                             },
+                            body: JSON.stringify({
+                                schema: schema
+                            }),
                             method: 'POST',
                         }
+
                         // Do async job
                         fetch('/api/extension/getForespoergselOption', opts)
                             .then(r => r.json())
@@ -1097,7 +1116,12 @@ module.exports = {
                             .catch(e => console.log(e))
                     }
 
-                    getStatus(statuskey) {
+                    /**
+                     * 
+                     * @param {*} statuskey 
+                     * @param {*} schema - if set, use override with this schema
+                     */
+                    getStatus(statuskey, schema = null) {
                         var _self = this
                         let opts = {
                             headers: {
@@ -1106,9 +1130,11 @@ module.exports = {
                             },
                             method: 'POST',
                             body: JSON.stringify({
-                                statusKey: statuskey
+                                statusKey: statuskey,
+                                schema: schema
                             })
                         }
+
                         // Do async job
                         fetch('/api/extension/getStatus', opts)
                             .then(r => r.json())
@@ -1126,9 +1152,10 @@ module.exports = {
 
                     /**
                      * Reads extents and status of saved foresp
-                     * @param {*} forespNummer 
+                     * @param {*} forespNummer
+                     * @param {*} schema - if set, use override with this schema
                      */
-                    getForespoergsel(forespNummer) {
+                    getForespoergsel(forespNummer, schema = null) {
                         var _self = this;
                         let opts = {
                             headers: {
@@ -1137,7 +1164,8 @@ module.exports = {
                             },
                             method: 'POST',
                             body: JSON.stringify({
-                                forespNummer: forespNummer
+                                forespNummer: forespNummer,
+                                schema: schema
                             })
                         }
                         // Do async job
@@ -1159,7 +1187,7 @@ module.exports = {
                                 cloud.get().map.fitBounds(bounds)
                                 
                                 // Apply filter
-                                _self.getStatus(f.statuskey)
+                                _self.getStatus(f.statuskey, schema_override)
                                 applyFilter(buildFilter(f.forespnummer))
 
 
@@ -1255,7 +1283,7 @@ module.exports = {
                                                     <Button size = "large" color = "default" variant = "contained" style = {margin} onClick = {_self.onBackClickHandler.bind(this)}>
                                                         <ArrowBackIcon fontSize = "small" />{__("backbutton")}
                                                     </Button>
-                                                    <LedningsDownload style = {margin} size = "large" color = "default" variant = "contained" endpoint = "/api/extension/downloadForespoergsel" forespnummer = {s.foresp}/>
+                                                    <LedningsDownload style = {margin} size = "large" color = "default" variant = "contained" endpoint = "/api/extension/downloadForespoergsel" forespnummer = {s.foresp} schema={schema_override} />
                                                 </div >
                                                 <div id = "graveAssistent-feature-ledningsejerliste" >
                                                     {s.overskredetDato && <div style={baddest}>Denne ledningspakke er ikke længere gyldig!</div>}

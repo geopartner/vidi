@@ -11,6 +11,20 @@ and this project adheres to [CalVer](https://calver.org/).
 - The "Sign out" in the Session dialog,  deletes the autoconnect.gc2 cookie. 
 - Graveassistent:
   - Added support for "empty" packages.
+  - Added support for schema override in config.json. Makes it possible to use the same graveassistent across the same database.
+
+    Enable schema override in config.json:
+    ```json
+    {
+      "extensionConfig": {
+        "graveAssistent": {
+          "schema": "schema to use"
+        }
+      }
+    }
+    ```
+
+    Set privileges for the layers accordingly.
 
 ## [2023.6.0] - 2023-20-6
 ### Fixed
