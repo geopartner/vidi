@@ -9,7 +9,8 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 - Filter Icon added in layer tree next to the eye icon. Indicates the present of a filter on the current layer 
 - The "Sign out" in the Session dialog,  deletes the autoconnect.gc2 cookie. 
-
+- Graveassistent:
+  - Added support for "empty" packages.
 
 ## [2023.6.0] - 2023-20-6
 ### Fixed

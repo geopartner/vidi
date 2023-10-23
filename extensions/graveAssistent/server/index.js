@@ -370,7 +370,7 @@ router.post('/api/extension/getForespoergsel', function (req, response) {
                     (SELECT count(gid) from ' + s.screenName + '.' + TABLEPREFIX + 'lines where fareklasse = \'meget farlig\' and forespnummer = ' + b.forespNummer + ' ) l_mf,\
                     (SELECT count(gid) from ' + s.screenName + '.' + TABLEPREFIX + 'lines where fareklasse = \'farlig\' and forespnummer = ' + b.forespNummer + ' ) l_f\
                     from ' + s.screenName + '.' + TABLEPREFIX + 'graveforespoergsel g\
-                    join ' + s.screenName + '.' + TABLEPREFIX + 'lines l on g.forespnummer = l.forespnummer\
+                    left join ' + s.screenName + '.' + TABLEPREFIX + 'lines l on g.forespnummer = l.forespnummer\
                     where g.forespnummer = ' + b.forespNummer + '\
                     GROUP BY g.forespnummer, l.svar_gyldigtil, g.bemaerkning,g.svar_uploadtime,g.graveperiode_fra,g.graveperiode_til, g.the_geom, g.statuskey'
 

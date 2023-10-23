@@ -605,20 +605,19 @@ module.exports = {
                                     }
     
                                     returnObj.data.push(lc(obj))
-                                    //TODO: gather up
                                 })
                             } catch (error) {
                                 console.log(error)
                                 reject(error)
                             }
                         } else {
-                            reject('Ledningspakken har ikke noget indhold. Dette kan ske hvis ingen ledningsejere har svaret endnu')
+                            // We no longer reject packages with no data, because empty packages are valid
+                            // reject('Ledningspakken har ikke noget indhold. Dette kan ske hvis ingen ledningsejere har svaret endnu')
                         }
 
 
                         console.log('Fandt elementer: '.concat(packageinfo.length, ' UtilityPackageInfo, ', owner.length, ' UtilityOwner, ', profil.length, ' Kontaktprofil, ', data.length, ' data'))
-                        //console.log(returnObj)
-
+                        console.log(returnObj)
 
                         resolve(returnObj)
                     });
@@ -882,8 +881,6 @@ module.exports = {
                                     authed: obj.status.authenticated
                                 }, () => {
                                     // Get foresp. if we really logged in.
-                                    // TODO: check we're in the right schema!
-                                    // TODO: turn on all 'dem layers
 
                                     if (me.state.authed) {
                                         me.populateDClayers()
@@ -905,6 +902,11 @@ module.exports = {
                     }
 
                     isTooOld(timestamp){
+                        // If timestamp is null, return false
+                        if (timestamp == null){
+                            return false
+                        }
+                        console.log(timestamp, new Date())
                         if (new Date(timestamp) < new Date()) {
                             return true
                         } else {
@@ -927,8 +929,6 @@ module.exports = {
                      */
                     onDrop(files) {
                         const _self = this;
-
-                        //TODO: Handle more?
 
                         var r = new FileReader();
                         r.readAsDataURL(files[0])
@@ -1153,7 +1153,7 @@ module.exports = {
                                     _self.onBackClickHandler()
                                 }
 
-                                // TODO: implement warning if MF/F exists!
+                                // implement warning if MF/F exists!
                                 let f = d[0].properties;
                                 let bounds = [[f.ymin, f.xmin],[f.ymax, f.xmax]];
                                 cloud.get().map.fitBounds(bounds)
@@ -1170,6 +1170,8 @@ module.exports = {
                                     harFarlig: this.hasMForF(f.l_f),
                                     harMegetFarlig: this.hasMForF(f.l_mf)
                                 })
+
+                                console.log(_self.state)
                             })
                             .catch(e => console.log(e))
                     }
