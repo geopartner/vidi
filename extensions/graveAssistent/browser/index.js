@@ -597,6 +597,8 @@ module.exports = {
                                                 //console.log(value.attr)
                                                 if (value.attr.hasOwnProperty('uom')) {
                                                     obj[key] = value.value + ' ' + value.attr.uom
+                                                } else {
+                                                    obj[key] = value.value
                                                 }
                                             }
                                             //console.log(obj[key])

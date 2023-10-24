@@ -661,8 +661,6 @@ router.post('/api/extension/upsertStatus', function (req, response) {
         schema = b.schema
     }
 
-    console.log(b, schema)
-
     try {
         // Build featurecollection
         var ejere = b.Ledningsejerliste

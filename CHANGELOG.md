@@ -12,10 +12,11 @@ and this project adheres to [CalVer](https://calver.org/).
 - Graveassistent:
   - Added support for "empty" packages.
   - Added support for schema override in config.json. Makes it possible to use the same graveassistent across the same database.
-
-    Enable schema override in config.json:
+  
+    Enable schema override in config.json. Set privileges for the layers accordingly, and add to schemata:
     ```json
     {
+      "schemata": ["schema to use"],
       "extensionConfig": {
         "graveAssistent": {
           "schema": "schema to use"
@@ -23,8 +24,6 @@ and this project adheres to [CalVer](https://calver.org/).
       }
     }
     ```
-
-    Set privileges for the layers accordingly.
 
 ## [2023.6.0] - 2023-20-6
 ### Fixed
