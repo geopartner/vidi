@@ -1200,8 +1200,6 @@ module.exports = {
                                     harFarlig: this.hasMForF(f.l_f),
                                     harMegetFarlig: this.hasMForF(f.l_mf)
                                 })
-
-                                console.log(_self.state)
                             })
                             .catch(e => console.log(e))
                     }
