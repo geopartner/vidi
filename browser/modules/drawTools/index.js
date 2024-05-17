@@ -81,5 +81,8 @@ const getAreaValue = e => {
 const getAreaOfCircle = e => {
     return L.GeometryUtil.readableArea(Math.pow(e.getRadius(), 2) * Math.PI, true);
 };
+const getAreaOfCircleValue = e => {
+    return Math.pow(e.getRadius(), 2) * Math.PI;
+};
 
-module.exports = { getDistance, getFeatureDistance, getArea, getAreaValue, getFeatureArea, getAreaOfCircle };
+module.exports = { getDistance, getFeatureDistance, getArea, getAreaValue, getFeatureArea, getAreaOfCircle, getAreaOfCircleValue };
