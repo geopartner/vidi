@@ -1057,8 +1057,7 @@ module.exports = {
 
             // Copy the path apparence to the marker
             var styleProperties = ['class', 'stroke', 'stroke-opacity'];
-            for (var i = 0; i < styleProperties.length; i++) {
-                var styleProperty = styleProperties[i];
+            for (const styleProperty of styleProperties) {
                 var pathProperty = this._path.getAttribute(styleProperty);
                 markersNode.setAttribute(styleProperty, pathProperty);
             }

@@ -586,13 +586,12 @@ module.exports = module.exports = {
     makeSearch: function (text, callBack, id = null, fromDrawing = false) {
         isCurrentFromDrawing = fromDrawing;
         currentFromDrawingId = id;
-        var primitive, coord,
+        var primitive,
             layer, buffer = parseFloat($("#conflict-buffer-value").val()), bufferValue = buffer,
             hitsTable = $("#hits-content tbody"),
             noHitsTable = $("#nohits-content tbody"),
             errorTable = $("#error-content tbody"),
             hitsData = $("#hits-data"),
-            row, fileId, searchFinish, geomStr,
             visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
 
         let _self = this;
@@ -654,7 +653,7 @@ module.exports = module.exports = {
         }
         // Handle edge case where buffer is 0 and matrikel-geomtri is flawed
         if (buffer === 0) {
-            buffer = -0.1;
+            buffer = 0.1;
         }
         primitive = layer.toGeoJSON(GEOJSON_PRECISION);
 
@@ -701,9 +700,8 @@ module.exports = module.exports = {
                 schemataStr = schemata.join(",");
             }
 
-            preProcessor({
-                // "projWktWithBuffer": projWktWithBuffer
-            }).then(function () {
+            preProcessor() // "{projWktWithBuffer": projWktWithBuffer}
+                .then(function () {
                 // If the type is a feature collection, we need to dissolve the features to a single multi-polygon
                 if (geom.type === 'FeatureCollection') {
                     geom = turfCombine(geom).features[0];
@@ -725,6 +723,7 @@ module.exports = module.exports = {
     recreateDrawings: (parr, l) => {
         let GeoJsonAdded = false;
         let v = parr;
+        let g;
 
         if (parr.length === 1) {
             $.each(v[0].geojson.features, function (n, m) {
@@ -737,7 +736,7 @@ module.exports = module.exports = {
                         }
                     });
 
-                    var g = json._layers[Object.keys(json._layers)[0]];
+                    g = json._layers[Object.keys(json._layers)[0]];
 
                     // Adding vidi-specific properties
                     g._vidi_type = m._vidi_type;
@@ -843,14 +842,14 @@ module.exports = module.exports = {
             groups.push(v.meta.layergroup);
         });
         groups = array_unique(groups.reverse());
-        for (let i = 0; i < groups.length; ++i) {
-            let row = "<tr><td><h4 style='font-weight: 400'>" + groups[i] + "</h4></td><td></td><td></td></tr>";
+        for (const element of groups) {
+            let row = "<tr><td><h4 style='font-weight: 400'>" + element + "</h4></td><td></td><td></td></tr>";
             hitsTable.append(row);
             let count = 0;
             $.each(response.hits, function (u, v) {
                 if (v.hits > 0) {
                     let metaData = v.meta;
-                    if (metaData.layergroup === groups[i]) {
+                    if (metaData.layergroup === element) {
                         count++;
                         row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + ($.inArray(v.table, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
                         hitsTable.append(row);
@@ -863,13 +862,13 @@ module.exports = module.exports = {
             }
         }
 
-        for (let u = 0; u < groups.length; ++u) {
-            let row = "<h4 style='font-weight: 400'>" + groups[u] + "</h4><hr style='margin-top: 2px; border-top: 1px solid #aaa'>";
+        for (const element of groups) {
+            let row = "<h4 style='font-weight: 400'>" + element + "</h4><hr style='margin-top: 2px; border-top: 1px solid #aaa'>";
             hitsData.append(row);
             let count = 0;
             $.each(response.hits, function (i, v) {
                 let table = v.table, table1, table2, tr, td, title, metaData = v.meta;
-                if (metaData.layergroup === groups[u]) {
+                if (metaData.layergroup === element) {
                     title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
                     if (v.error === null) {
                         if (metaData.meta_url) {
