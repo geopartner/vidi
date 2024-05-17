@@ -514,7 +514,7 @@ module.exports = {
                 }
 
                 if (type === "polygon" || type === "rectangle") {
-                    area = drawTools.getArea(drawLayer);
+                    area = utils.formatArea( drawTools.getAreaValue(drawLayer));
                 }
                 if (type === 'polyline') {
                     distance = drawTools.getDistance(drawLayer);
@@ -522,7 +522,7 @@ module.exports = {
                 }
                 if (type === 'circle') {
                     distance = L.GeometryUtil.readableDistance(drawLayer.getRadius(), true);
-                    area = drawTools.getAreaOfCircle(drawLayer);
+                    area = utils.formatArea( drawTools.getAreaOfCircle(drawLayer));
                 }
 
                 drawLayer._vidi_type = "draw";

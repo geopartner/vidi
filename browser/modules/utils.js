@@ -16,6 +16,7 @@ module.exports = {
         
         const kmBigArea= 1000000;
         const haBigArea =  10000;
+        const smallArea = 1;
 
         if (a > kmBigArea) {
           a = a / kmBigArea;
@@ -26,11 +27,12 @@ module.exports = {
             return a.toFixed(2) + ' ' + 'ha';
         }
         const unit= 'm²'; 
-        if (a < 100) {
-          return a.toFixed(1) + ' ' + unit;
-        } else {
-          return Math.round(a) + ' ' + unit;
+        if (a < 100 && a > smallArea) {
+          return a.toFixed(2) + ' ' + unit;
         }
+        const digits =  Math.floor(Math.abs(Math.log10(a))) +2;
+        return a.toFixed(digits) + ' ' + unit;
+
     },
     /**
      * @todo Remove deprecated "height" parameter

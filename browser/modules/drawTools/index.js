@@ -74,10 +74,12 @@ const getArea = e => {
     return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(e.getLatLngs()[0]), true);
 };
 
- 
+const getAreaValue = e => {
+    return L.GeometryUtil.geodesicArea(e.getLatLngs()[0]);
+};
 
 const getAreaOfCircle = e => {
     return L.GeometryUtil.readableArea(Math.pow(e.getRadius(), 2) * Math.PI, true);
 };
 
-module.exports = { getDistance, getFeatureDistance, getArea, getFeatureArea, getAreaOfCircle };
+module.exports = { getDistance, getFeatureDistance, getArea, getAreaValue, getFeatureArea, getAreaOfCircle };
