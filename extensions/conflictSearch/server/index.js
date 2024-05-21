@@ -63,12 +63,12 @@ router.post('/api/extension/conflictSearch', function (req, response) {
             return;
         }
         // Count layers
-        for (let i = 0; i < metaData.data.length; i = i + 1) {
-            if (metaData.data[i].type !== "RASTER" &&
-                metaData.data[i].baselayer !== true &&
-                metaData.data[i].skipconflict !== true) {
-                metaDataFinal.data.push(metaData.data[i]);
-                metaDataKeys[metaData.data[i].f_table_schema + '.' + metaData.data[i].f_table_name] = metaData.data[i];
+        for (const element of metaData.data) {
+            if (element.type !== "RASTER" &&
+                element.baselayer !== true &&
+                element.skipconflict !== true) {
+                metaDataFinal.data.push(element);
+                metaDataKeys[element.f_table_schema + '.' + element.f_table_name] = element;
             }
         }
         const createPool = async function () {
@@ -210,14 +210,14 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                     message = result.message;
                     time = new Date().getTime() - startTime;
                     if (result.features) {
-                        for (let i = 0; i < result.features.length; i++) {
+                        for (const element of result.features) {
                             for (let prop in queryables) {
                                 if (queryables.hasOwnProperty(prop)) {
                                     if (queryables[prop].conflict) {
                                         tmp.push({
                                             name: prop,
                                             alias: queryables[prop].alias || prop,
-                                            value: result.features[i].properties[prop],
+                                            value: element.properties[prop],
                                             sort_id: queryables[prop].sort_id,
                                             link: queryables[prop].link,
                                             linkprefix: queryables[prop].linkprefix,
@@ -230,7 +230,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                 tmp.push({
                                     name: metaDataKeys[table].pkey,
                                     alias: null,
-                                    value: result.features[i].properties[metaDataKeys[table].pkey],
+                                    value: element.properties[metaDataKeys[table].pkey],
                                     sort_id: null,
                                     key: true
                                 });
