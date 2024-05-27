@@ -115,6 +115,7 @@ const resetObj = {
   user_udpeg_layer: null,
   user_ventil_layer_key: null,
   user_ventil_export: null,
+  selected_profileid: null,
 };
 
 // This element contains the styling for the module
@@ -369,6 +370,10 @@ module.exports = {
         da_DK: "Tilføj eller fjern matrikler",
         en_US: "Add or remove parcels",
       },
+      "Select profile": {
+        da_DK: "Vælg profil",
+        en_US: "Select profile",
+      },
     };
 
     /**
@@ -441,6 +446,7 @@ module.exports = {
           user_udpeg_layer: null,
           user_ventil_export: null,
           edit_matr: false,
+          selected_profileid: '',
         };
       }
 
@@ -568,6 +574,14 @@ module.exports = {
               type: "GET",
               success: function (data) {
                 console.log("Got user", data);
+
+                // If data.profileid has values, set the first key as the selected
+                let userProfiles = [];
+                if (data.profileid) {
+                  userProfiles = Object.keys(data.profileid);
+                }
+                console.log(userProfiles)
+
                 me.setState({
                   user_lukkeliste: data.lukkeliste,
                   user_blueidea: data.blueidea,
@@ -578,6 +592,7 @@ module.exports = {
                   user_ventil_layer: data.ventil_layer || null,
                   user_ventil_layer_key: data.ventil_layer_key || null,
                   user_ventil_export: data.ventil_export || null,
+                  selected_profileid: userProfiles[0] || '',
                 });
                 resolve(data);
               },
@@ -959,7 +974,7 @@ module.exports = {
        */
       sendToBlueIdea = () => {
         let body = {
-          profileId: this.state.user_profileid || null,
+          profileId: parseInt(this.state.selected_profileid) || null,
         };
 
         // if blueidea is false, return
@@ -1439,12 +1454,33 @@ module.exports = {
         this.downloadBlob(rows, "ventiler.csv", "text/csv;");
       };
 
+      profileidOptions = () => {
+        let options = [];
+
+        // if user_profileid is set, create options.
+        if (this.state.user_profileid) {
+          for (let key in this.state.user_profileid) {
+            options.push({
+              value: key,
+              label: this.state.user_profileid[key],
+            });
+          }
+        }
+        return options;
+      }
+
+      setSelectedProfileid = (e) => {
+        this.setState({ selected_profileid: e.target.value });
+      }
+
       /**
        * Renders component
        */
       render() {
         const _self = this;
         const s = _self.state;
+
+        console.log(s.selected_profileid)
 
         // If not logged in, show login button
         if (s.authed && s.user_id) {
@@ -1496,6 +1532,20 @@ module.exports = {
                   >
                     {__("Download addresses")}
                   </button>
+
+                  {s.user_profileid &&
+                    <select
+                      onChange={this.setSelectedProfileid}
+                      value={s.selected_profileid}
+                      placeholder={__("Select profile")}
+                    >
+                      {this.profileidOptions().map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  }
 
                   <button
                     onClick={() => this.sendToBlueIdea()}
