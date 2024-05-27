@@ -115,7 +115,7 @@ class MarkupGenerator {
                                                                        ${lockedLayer}
                                                                        <span class="js-tiles-contain-data" style="display: ${moduleState.tileContentCache[layerKey] ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
                                                                        title="${__("Layer is visible")}"><i class="bi bi-eye info-icon text-success"></i></span>
-                                                                       <span class="js-tiles-has-filter" style="visibility: ${hasFilter ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                                                       <span class="js-tiles-has-filter" style="display: ${hasFilter ? "inline" : "none"};" data-toggle="tooltip" data-placement="right"
                                                                         title="${__("Layer has filter")}"><i class="bi bi-filter text-success"></i></span>
                                                                        <span class="js-layer-is-disabled" style="display: ${disableCheckBox ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
                                                                        title="${__("Locked")}"><i class="bi bi-lock text-danger"></i></span>
