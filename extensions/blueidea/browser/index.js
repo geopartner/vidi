@@ -1538,6 +1538,7 @@ module.exports = {
                       onChange={this.setSelectedProfileid}
                       value={s.selected_profileid}
                       placeholder={__("Select profile")}
+                      disabled={!this.readyToBlueIdea()}
                     >
                       {this.profileidOptions().map((option) => (
                         <option key={option.value} value={option.value}>
