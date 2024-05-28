@@ -666,10 +666,11 @@ module.exports = module.exports = {
             })
         }
         // Set has-filter visibility
+        const layerKeyDot = layerKey + '.';
         if (activeFilters.length > 0) {
-            $(`[data-gc2-layer-key^="${layerKey}."]`).find('.js-tiles-has-filter').show();
+            $(`[data-gc2-layer-key^="${layerKeyDot}"]`).find('.js-tiles-has-filter').show();
         }else {
-            $(`[data-gc2-layer-key^="${layerKey}."]`).find('.js-tiles-has-filter').hide();
+            $(`[data-gc2-layer-key^="${layerKeyDot}"]`).find('.js-tiles-has-filter').hide();
         }
         if (parsedMeta?.referenced_by && activeFilters.length === 0) {
             JSON.parse(parsedMeta.referenced_by).forEach((i) => {
