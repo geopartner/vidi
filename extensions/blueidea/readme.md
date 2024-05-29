@@ -41,12 +41,15 @@ module.exports = {
     "d7a12844-5fc9-4316-9af7-b841fcc3d399": {
       username: "superuser",
       password: "supersecret",
-      profileid: 3793,
+      profileid: {
+        3793: "profilnavn i selection",
+      },
       lukkeliste: true,
       blueidea: true,
       ventil_layer: "ledningsplan_fjv.ventil",
       ventil_layer_key: "ventilid",
       udpeg_layer: "ledningsplan_fjv.vw_centerlinje",
+      alarmkabel: true,
     },
   },
 };
@@ -64,10 +67,11 @@ module.exports = {
 | password         | string  |         | blueidea adgangskode                                           |
 | blueidea         | boolean | `True`  | om brugeren skal have adgang til blueidea-værktøjerne          |
 | lukkeliste       | boolean | `False` | om brugeren skal have adgang til lukkeliste-værktøjerne        |
-| profileid        | int     |         | blueidea profil id                                             |
+| profileid        | obj     |         | objekt med profilid & alias                                    |
 | ventil_layer     | string  |         | navnet på layeret hvor ventil-lukkeliste skal findes           |
 | ventil_layer_key | string  |         | navnet på kolonnen som skal filtreres på                       |
 | udpeg_layer      | string  |         | navnet på lag som skal tændes når man vil udpegde i lukkeliste |
+| alarmkabel       | boolean | `False` | om brugeren skal have adgang til alarmkabel-værktøjerne        |
 
 Der skal ligeledes laves en opsætning af extension i kørselsmiljøet. Se nedenfor.
 
