@@ -65,7 +65,7 @@ module.exports = {
 | debug            | boolean |         | styrer om beskeder i blueidea sættes som testmode              |
 | username         | string  |         | blueidea brugernavn                                            |
 | password         | string  |         | blueidea adgangskode                                           |
-| blueidea         | boolean | `True`  | om brugeren skal have adgang til blueidea-værktøjerne          |
+| blueidea         | boolean | `False`  | om brugeren skal have adgang til blueidea-værktøjerne          |
 | lukkeliste       | boolean | `False` | om brugeren skal have adgang til lukkeliste-værktøjerne        |
 | profileid        | obj     |         | objekt med profilid & alias                                    |
 | ventil_layer     | string  |         | navnet på layeret hvor ventil-lukkeliste skal findes           |

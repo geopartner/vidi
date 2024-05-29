@@ -29,6 +29,8 @@ const MILISECSDAY = 86400000;
 var MAXFEATURES = 500;
 MAXFEATURES = bi.maxfeatures;
 
+const TIMEOUT = 30000;
+
 /**
  * This function handles basic checks for each request
  * @param req
@@ -89,8 +91,9 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
 
   returnobj = {
     profileid: user.profileid ? user.profileid : null,
-    lukkeliste: user.lukkeliste,
-    blueidea: user.blueidea,
+    lukkeliste: user.lukkeliste ? user.lukkeliste : false,
+    alarmkabel: user.alarmkabel ? user.alarmkabel : false,
+    blueidea: user.blueidea ? user.blueidea : false,
     ventil_layer: user.ventil_layer ? user.ventil_layer : null,
     ventil_layer_key: user.ventil_layer_key ? user.ventil_layer_key : null,
     udpeg_layer: user.udpeg_layer ? user.udpeg_layer : null,
@@ -118,8 +121,7 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
 });
 
 // Get the list of sms templates
-router.get(
-  "/api/extension/blueidea/:userid/GetSmSTemplates/",
+router.get("/api/extension/blueidea/:userid/GetSmSTemplates/",
   function (req, response) {
     guard(req, response);
 
@@ -156,8 +158,7 @@ router.get(
 );
 
 // Create message in BlueIdeas system, and return the smsGroupId
-router.post(
-  "/api/extension/blueidea/:userid/CreateMessage",
+router.post("/api/extension/blueidea/:userid/CreateMessage",
   function (req, response) {
     guard(req, response);
 
@@ -198,9 +199,70 @@ router.post(
   }
 );
 
+// Query alarmkabel-plugin in database
+router.post("/api/extension/alarmkabel/:userid/query",
+  function (req, response) {
+    guard(req, response);
+
+    // guard against missing lat and lng in body
+    if (!req.body.hasOwnProperty("lat") || !req.body.hasOwnProperty("lng")) {
+      response.status(401).send("Missing lat or lng");
+      return;
+    }
+
+    // Guard against no distance
+    if (!req.body.hasOwnProperty("distance")) {
+      response.status(401).send("Missing distance");
+      return;
+    }
+
+    // set timeout to 30s
+    req.setTimeout(TIMEOUT);
+
+    // create the string we need to query the database
+    q = `SELECT lukkeliste.fnc_dan_alarm(ST_Transform(ST_GeomFromEWKT('SRID=4326;Point(${req.body.lng} ${req.body.lat})'),25832)::geometry, ${req.body.lng}, '${req.session.screenName}')`;
+
+    SQLAPI(q, req)
+      .then((uuid) => {
+        console.log(uuid)
+        let beregnuuid = uuid.features[0].properties.fnc_dan_alarm;
+        let promises = [];
+
+        console.log(q, " -> ", beregnuuid);
+
+        // TODO: We got the calculation - now what?
+
+        // when promises are complete, return the result
+        Promise.all(promises)
+          .then((res) => {
+            // if afskaaretmatrikler is over 500, count it as an error
+            if (res[1].features.length > MAXFEATURES) {
+              res[0] = {
+                error: `Der er fundet mere end ${MAXFEATURES} matrikler (${res[1].features.length}), der skal lukkes. Kontakt venligst en af vores medarbejdere.`,
+              };
+            }
+
+            response.status(200).json({
+              ventiler: res[0],
+              matrikler: res[1],
+              ledninger: res[2],
+              log: res[3],
+            });
+          })
+          .catch((err) => {
+            console.error(err);
+            response.status(500).json(err);
+          });
+      })
+      .catch((err) => {
+        console.error(err);
+        response.status(500).json(err);
+      });
+  }
+);
+
 // Query lukkeliste-plugin in database
-router.post(
-  "/api/extension/lukkeliste/:userid/query",
+router.post("/api/extension/lukkeliste/:userid/query",
   function (req, response) {
     guard(req, response);
 
@@ -211,7 +273,7 @@ router.post(
     }
 
     // set timeout to 30s
-    req.setTimeout(30000);
+    req.setTimeout(TIMEOUT);
 
     // create the string we need to query the database
     q = `SELECT lukkeliste.fnc_dan_lukkeliste(ST_Transform(ST_GeomFromEWKT('SRID=4326;Point(${req.body.lng} ${req.body.lat})'),25832)::geometry, false, '${req.session.screenName}')`;

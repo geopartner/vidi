@@ -116,6 +116,8 @@ const resetObj = {
   user_ventil_layer_key: null,
   user_ventil_export: null,
   selected_profileid: null,
+  user_alarmkabel: false,
+  user_alarmkabel_distance: 0,
 };
 
 // This element contains the styling for the module
@@ -310,6 +312,10 @@ module.exports = {
         da_DK: "Udpeg punkt på ledningsnet",
         en_US: "Select point on map",
       },
+      "Select point for alarmkabel": {
+        da_DK: "Beregn alarm",
+        en_US: "Calculate alarm",
+      },
       "Found parcels": {
         da_DK: "Fundne matrikler i område",
         en_US: "Found parcels in area",
@@ -373,6 +379,18 @@ module.exports = {
       "Select profile": {
         da_DK: "Vælg profil",
         en_US: "Select profile",
+      },
+      "Alarm cable": {
+        da_DK: "Alarmkabel",
+        en_US: "Alarm cable",
+      },
+      "Distance": {
+        da_DK: "Afstand",
+        en_US: "Distance",
+      },
+      "Distance not set": {
+        da_DK: "Afstand ikke sat",
+        en_US: "Distance not set",
       },
     };
 
@@ -446,6 +464,8 @@ module.exports = {
           user_udpeg_layer: null,
           user_ventil_export: null,
           edit_matr: false,
+          user_alarmkabel: null,
+          user_alarmkabel_distance: 0,
           selected_profileid: '',
         };
       }
@@ -573,14 +593,13 @@ module.exports = {
                 config.extensionConfig.blueidea.userid,
               type: "GET",
               success: function (data) {
-                console.log("Got user", data);
+                console.log("[Lukkeliste] Got user", data);
 
                 // If data.profileid has values, set the first key as the selected
                 let userProfiles = [];
                 if (data.profileid) {
                   userProfiles = Object.keys(data.profileid);
                 }
-                console.log(userProfiles)
 
                 me.setState({
                   user_lukkeliste: data.lukkeliste,
@@ -593,6 +612,7 @@ module.exports = {
                   user_ventil_layer_key: data.ventil_layer_key || null,
                   user_ventil_export: data.ventil_export || null,
                   selected_profileid: userProfiles[0] || '',
+                  user_alarmkabel: data.alarmkabel
                 });
                 resolve(data);
               },
@@ -629,6 +649,31 @@ module.exports = {
           });
         });
       };
+
+      /**
+       * This function queries database for information related to alarmkabel
+       * @returns uuid string representing the query
+       */
+      queryPointAlarmkabel = (point, distance) => {
+        let me = this;
+        let body = point;
+        body.distance = distance;  //append distance to body
+
+        return new Promise(function (resolve, reject) {
+          $.ajax({
+            url: "/api/extension/alarmkabel/" + me.state.user_id + "/query",
+            type: "POST",
+            data: JSON.stringify(body),
+            contentType: "application/json",
+            success: function (data) {
+              resolve(data);
+            },
+            error: function (e) {
+              reject(e);
+            },
+          });
+        });
+      }
 
       /**
        * This function is what starts the process of finding relevant addresses, returns array with kvhx
@@ -1133,6 +1178,59 @@ module.exports = {
         return
       };
 
+      /**
+       * This function selects a point in the map for alarmkabel
+       * @returns Point
+       */
+      selectPointAlarmkabel = () => {
+        let me = this;
+        let point = null;
+        blocked = false;
+        _clearAll();
+
+        // if udpeg_layer is set, make sure it is turned on
+        if (me.state.user_udpeg_layer) {
+          me.turnOnLayer(me.state.user_udpeg_layer);
+        }
+
+        // If distance is not set, or is 0, return
+        if (!me.state.user_alarmkabel_distance) {
+          me.createSnack(__("Distance not set"));
+          return;
+        }
+        // change the cursor to crosshair and wait for a click
+        utils.cursorStyle().crosshair();
+
+        cloud.get().on("click", function (e) {
+          // if the click is blocked, return
+          if (blocked) {
+            return;
+          }
+
+          me.createSnack(__("Starting analysis"))
+
+          // get the clicked point
+          point = e.latlng;
+          utils.cursorStyle().reset();
+          blocked = true;
+
+          // send the point to the server + the distance
+          me.queryPointAlarmkabel(point, me.state.user_alarmkabel_distance)
+            .then((data) => {
+              // if the server returns a result, show it
+              if (data) {
+                console.debug(data);
+                return
+              }
+            })
+            .catch((error) => {
+              console.warn(error);
+              return
+            });
+        });
+        return
+      }; 
+
       toggleEdit = () => {
         let me = this;
 
@@ -1221,7 +1319,7 @@ module.exports = {
           ejerlav = sublayer.feature.properties.ejerlavkode;
         });
 
-        console.log(matrikel, ejerlav)
+        //console.log(matrikel, ejerlav)
 
         // Remove adresse from list
         let newAdresser = Object.assign({}, this.state.results_adresser);
@@ -1319,6 +1417,17 @@ module.exports = {
           return false;
         }
       };
+
+      /**
+       * Determines if alarmkabel is allowed
+       */
+      allowAlarmkabel = () => {
+        if (this.state.user_alarmkabel == true) {
+          return true;
+        } else {
+          return false;
+        }
+      }
 
       /**
        * Determines if blueidea is allowed
@@ -1428,7 +1537,7 @@ module.exports = {
       downloadVentiler = () => {
         let me = this;
 
-        console.log(me.state.results_ventiler, me.state.user_ventil_export);
+        //console.log(me.state.results_ventiler, me.state.user_ventil_export);
 
         // Use keys as headers
         let csvRows = [];
@@ -1479,8 +1588,6 @@ module.exports = {
       render() {
         const _self = this;
         const s = _self.state;
-
-        console.log(s.selected_profileid)
 
         // If not logged in, show login button
         if (s.authed && s.user_id) {
@@ -1569,6 +1676,30 @@ module.exports = {
                       disabled={!this.allowVentilDownload()}
                     >
                       {__("Download valves")}
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  style={{ alignSelf: "center" }}
+                  hidden={!s.user_alarmkabel}
+                >
+                  <h4>{__("Alarm cable")}</h4>
+                  <div className="row mx-auto gap-3">
+                    <input
+                      type="number"
+                      className="form-control"
+                      value={s.user_alarmkabel_distance}
+                      onChange={(e) => this.setState({ user_alarmkabel_distance: e.target.value })}
+                      min={0}
+                      max={2000}
+                      style={{ width: "35%" }}
+                    />
+                    <button
+                      onClick={() => this.selectPointAlarmkabel()}
+                      className="btn btn-primary col-auto"
+                    >
+                      {__("Select point for alarmkabel")}
                     </button>
                   </div>
                 </div>
