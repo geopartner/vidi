@@ -4112,7 +4112,8 @@ module.exports = {
         let layersInSubGroups = 0;
         const metaData = meta.getMetaData();
         const layersInGroup = metaData.data.filter(e => e.layergroup === layerGroup).length;
-        const activeLayers = _self.getActiveLayers().filter(e => metaDataKeys[e]?.layergroup === layerGroup);
+        const activeLayersRaw =_self.getActiveLayers().map(str => {return str.startsWith('v:') ?  str.slice(2) : str});
+        const activeLayers = activeLayersRaw.filter(e => metaDataKeys[e]?.layergroup === layerGroup);
         const activeLayersInGroup = activeLayers.length;
         if (layerSubGroup) {
             let split = layerSubGroup.split('|');
