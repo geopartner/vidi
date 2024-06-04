@@ -220,33 +220,30 @@ router.post("/api/extension/alarmkabel/:userid/query",
     req.setTimeout(TIMEOUT);
 
     // create the string we need to query the database
-    q = `SELECT lukkeliste.fnc_dan_alarm(ST_Transform(ST_GeomFromEWKT('SRID=4326;Point(${req.body.lng} ${req.body.lat})'),25832)::geometry, ${req.body.lng}, '${req.session.screenName}')`;
+    q = `SELECT lukkeliste.fnc_dan_alarm(ST_Transform(ST_GeomFromEWKT('SRID=4326;Point(${req.body.lng} ${req.body.lat})'),25832)::geometry, ${req.body.distance}, '${req.session.screenName}')`;
 
     SQLAPI(q, req)
       .then((uuid) => {
-        console.log(uuid)
         let beregnuuid = uuid.features[0].properties.fnc_dan_alarm;
         let promises = [];
 
         console.log(q, " -> ", beregnuuid);
 
-        // TODO: We got the calculation - now what?
+        // get points
+        promises.push(
+          SQLAPI(
+            `SELECT * from lukkeliste.vw_alarmpkt where beregnuuid = '${beregnuuid}'`,
+            req,
+            { format: "geojson", srs: 4326 }
+          )
+        );
 
         // when promises are complete, return the result
         Promise.all(promises)
           .then((res) => {
-            // if afskaaretmatrikler is over 500, count it as an error
-            if (res[1].features.length > MAXFEATURES) {
-              res[0] = {
-                error: `Der er fundet mere end ${MAXFEATURES} matrikler (${res[1].features.length}), der skal lukkes. Kontakt venligst en af vores medarbejdere.`,
-              };
-            }
-
             response.status(200).json({
-              ventiler: res[0],
-              matrikler: res[1],
-              ledninger: res[2],
-              log: res[3],
+              alarm: res[0],
+              log: [],
             });
           })
           .catch((err) => {

@@ -78,6 +78,7 @@ var queryMatrs = new L.FeatureGroup();
 var queryVentils = new L.FeatureGroup();
 var selectedPoint = new L.FeatureGroup();
 var seletedLedninger = new L.FeatureGroup();
+var alarmPositions = new L.FeatureGroup();
 
 var _clearBuffer = function () {
   bufferItems.clearLayers();
@@ -94,6 +95,9 @@ var _clearSelectedPoint = function () {
 var _clearSeletedLedninger = function () {
   seletedLedninger.clearLayers();
 };
+var _clearAlarmPositions = function () {
+  alarmPositions.clearLayers();
+};
 
 var _clearAll = function () {
   _clearBuffer();
@@ -101,6 +105,7 @@ var _clearAll = function () {
   _clearVentil();
   _clearSelectedPoint();
   _clearSeletedLedninger();
+  _clearAlarmPositions();
 };
 
 const MAXFEATURES = 500;
@@ -144,12 +149,7 @@ var styleObject = {
   },
   selectedPoint: {
     html: `
-  <svg
-  width="24"
-  height="24"
-  xmlns="http://www.w3.org/2000/svg" 
-  fill-rule="evenodd"
-  clip-rule="evenodd">
+  <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd">
   <path d="M12 11.293l10.293-10.293.707.707-10.293 10.293 10.293 10.293-.707.707-10.293-10.293-10.293 10.293-.707-.707 10.293-10.293-10.293-10.293.707-.707 10.293 10.293z"/>
   </svg>
   `,
@@ -170,6 +170,16 @@ var styleObject = {
     opacity: 1,
     fillOpacity: 0.1,
     dashArray: "5,3",
+  },
+  alarmPosition: {
+    html: `
+  <svg fill="#000000" width="24px" height="24px" viewBox="0 0 57.6 57.6" xmlns="http://www.w3.org/2000/svg">
+  <path d="M28.709 0c-10.872 0 -19.71 8.838 -19.71 19.706 0 5.418 2.408 10.436 7.362 15.347 7.193 7.139 10.548 13.73 10.548 20.747v1.8h3.6v-1.8c0 -6.984 3.308 -13.385 10.728 -20.743 4.954 -4.914 7.362 -9.932 7.362 -15.35 0 -10.868 -8.838 -19.706 -19.89 -19.706" fill-rule="evenodd"/>
+  </svg>
+  `,
+    className: "",
+    iconSize: [24, 24], // size of the icon
+    iconAnchor: [12, 24], // point of the icon which will correspond to marker's location
   },
 };
 
@@ -272,6 +282,7 @@ module.exports = {
     mapObj.addLayer(queryVentils);
     mapObj.addLayer(selectedPoint);
     mapObj.addLayer(seletedLedninger);
+    mapObj.addLayer(alarmPositions);
 
     /**
      *
@@ -389,8 +400,12 @@ module.exports = {
         en_US: "Distance",
       },
       "Distance not set": {
-        da_DK: "Afstand ikke sat",
-        en_US: "Distance not set",
+        da_DK: "Ugyldig afstand",
+        en_US: "Invalid distance",
+      },
+      "Alarm found": {
+        da_DK: "Mulige placeringer fundet",
+        en_US: "Possible alarms found",
       },
     };
 
@@ -412,30 +427,6 @@ module.exports = {
       }
     };
 
-    var pushStatus = function (obj, statusKey) {
-      let postData = {
-        Ledningsejerliste: obj,
-        statusKey: statusKey,
-      };
-      let opts = {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify(postData),
-      };
-
-      return new Promise(function (resolve, reject) {
-        // Do async job and resolve
-        fetch("/api/extension/upsertStatus", opts)
-          .then((r) => {
-            const data = r.json();
-            resolve(data);
-          })
-          .catch((e) => reject(e));
-      });
-    };
 
     var blocked = true;
 
@@ -465,7 +456,7 @@ module.exports = {
           user_ventil_export: null,
           edit_matr: false,
           user_alarmkabel: null,
-          user_alarmkabel_distance: 0,
+          user_alarmkabel_distance: config.extensionConfig.blueidea.alarmkabel_distance || 100,
           selected_profileid: '',
         };
       }
@@ -712,7 +703,7 @@ module.exports = {
           this.addBufferToMap(geom);
 
           // Let user know we are starting
-          me.createSnack(__("Waiting to start"));
+          me.createSnack(__("Waiting to start"), true);
 
           // For each flattened element, start a query for matrikels intersected
           let promises = [];
@@ -729,7 +720,7 @@ module.exports = {
               try {
                 let merged = this.mergeMatrikler(results);
                 this.addMatrsToMap(merged);
-                me.createSnack(__("Found parcels"));
+                me.createSnack(__("Found parcels"), true);
 
                 return merged;
               } catch (error) {
@@ -746,7 +737,7 @@ module.exports = {
 
               Promise.all(promises2).then((results) => {
                 let adresser = this.mergeAdresser(results);
-                me.createSnack(__("Found addresses"));
+                me.createSnack(__("Found addresses"), true);
 
                 //console.debug("Got addresses", adresser);
                 // Set results
@@ -984,11 +975,35 @@ module.exports = {
       }
 
       /**
+       * Styles and adds the alarm positions to the map
+       */
+      addAlarmPositionToMap(geojson) {
+        try {
+          var myIcon = new L.DivIcon(styleObject.alarmPosition);
+          var l = L.geoJSON(geojson, {
+            pointToLayer: function (feature, latlng) {
+              return new L.Marker(latlng, { icon: myIcon, interactive: false });
+            },
+          }).addTo(alarmPositions);
+        } catch (error) {
+          console.warn(error, geojson);
+        }
+      }
+
+      /**
        * Creates a new snackbar
        * @param {*} text
        */
-      createSnack(text) {
-        utils.showInfoToast("<span id='blueidea-progress'>" + text + "</span>", { timeout: 5000, autohide: false})
+      createSnack(text, loading = false) {
+        let html = "";
+        // if loading is true, show a loading spinner in the snackbar
+        if (loading) {
+          html = "<span class='spinner-border spinner-border-sm'></span><span id='blueidea-progress'> " + text + "</span>";
+        } else {
+          html = "<span id='blueidea-progress'>" + text + "</span>"
+        }
+
+        utils.showInfoToast(html, { timeout: 5000, autohide: false})
       }
 
 
@@ -1119,12 +1134,16 @@ module.exports = {
         utils.cursorStyle().crosshair();
 
         cloud.get().on("click", function (e) {
+
+          // remove event listener
+          cloud.get().map.off("click");
+
           // if the click is blocked, return
           if (blocked) {
             return;
           }
 
-          me.createSnack(__("Starting analysis"))
+          me.createSnack(__("Starting analysis"), true)
 
           // get the clicked point
           point = e.latlng;
@@ -1194,7 +1213,7 @@ module.exports = {
         }
 
         // If distance is not set, or is 0, return
-        if (!me.state.user_alarmkabel_distance) {
+        if (!me.state.user_alarmkabel_distance || me.state.user_alarmkabel_distance == 0) {
           me.createSnack(__("Distance not set"));
           return;
         }
@@ -1202,12 +1221,16 @@ module.exports = {
         utils.cursorStyle().crosshair();
 
         cloud.get().on("click", function (e) {
+
+          // remove event listener
+          cloud.get().map.off("click");
+
           // if the click is blocked, return
           if (blocked) {
             return;
           }
 
-          me.createSnack(__("Starting analysis"))
+          me.createSnack(__("Starting analysis"), true)
 
           // get the clicked point
           point = e.latlng;
@@ -1217,13 +1240,17 @@ module.exports = {
           // send the point to the server + the distance
           me.queryPointAlarmkabel(point, me.state.user_alarmkabel_distance)
             .then((data) => {
+
+              me.createSnack(__("Alarm found"))
               // if the server returns a result, show it
               if (data) {
-                console.debug(data);
+                // console.debug(data);                
+                me.addAlarmPositionToMap(data.alarm);
                 return
               }
             })
             .catch((error) => {
+              me.createSnack(__("Error in seach") + ": " + error);
               console.warn(error);
               return
             });
@@ -1422,7 +1449,7 @@ module.exports = {
        * Determines if alarmkabel is allowed
        */
       allowAlarmkabel = () => {
-        if (this.state.user_alarmkabel == true) {
+        if (this.state.user_alarmkabel == true && this.state.user_db == true) {
           return true;
         } else {
           return false;
@@ -1698,6 +1725,7 @@ module.exports = {
                     <button
                       onClick={() => this.selectPointAlarmkabel()}
                       className="btn btn-primary col-auto"
+                      disabled={!this.allowAlarmkabel()}
                     >
                       {__("Select point for alarmkabel")}
                     </button>

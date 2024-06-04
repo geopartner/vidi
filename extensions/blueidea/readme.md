@@ -65,7 +65,7 @@ module.exports = {
 | debug            | boolean |         | styrer om beskeder i blueidea sættes som testmode              |
 | username         | string  |         | blueidea brugernavn                                            |
 | password         | string  |         | blueidea adgangskode                                           |
-| blueidea         | boolean | `False`  | om brugeren skal have adgang til blueidea-værktøjerne          |
+| blueidea         | boolean | `False` | om brugeren skal have adgang til blueidea-værktøjerne          |
 | lukkeliste       | boolean | `False` | om brugeren skal have adgang til lukkeliste-værktøjerne        |
 | profileid        | obj     |         | objekt med profilid & alias                                    |
 | ventil_layer     | string  |         | navnet på layeret hvor ventil-lukkeliste skal findes           |
@@ -83,13 +83,17 @@ Denne extension afhænger af `session` extensionen, så den skal også være loa
   "enabledExtensions": ["session", "blueidea"],
   "extensionConfig": {
     "blueidea": {
-      "userid": "d7a12844-5fc9-4316-9af7-b841fcc3d399"
+      "userid": "d7a12844-5fc9-4316-9af7-b841fcc3d399",
+      "alarmkabel_distance": 75
     }
   }
 }
 ```
 
-Det noteres at `userid` er en reference til en bruger i `users` konfigurationen.
+| Property            | Type | Default | Description                                        |
+| ------------------- | ---- | ------- | -------------------------------------------------- |
+| user                | guid |         | direkte reference til server-konfiguration         |
+| alarmkabel_distance | int  | 100     | afstand i meter fra udpeget punkt til alarmvisning |
 
 ### GC2
 
