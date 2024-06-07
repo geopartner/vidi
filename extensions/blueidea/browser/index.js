@@ -380,8 +380,8 @@ module.exports = {
         en_US: "You are not allowed to use BlueIdea",
       },
       "Starting analysis": {
-        da_DK: "Starter analyse",
-        en_US: "Starting analysis",
+        da_DK: "Analyserer",
+        en_US: "Analyzing",
       },
       "modify parcels": {
         da_DK: "Tilføj eller fjern matrikler",
@@ -406,6 +406,14 @@ module.exports = {
       "Alarm found": {
         da_DK: "Mulige placeringer fundet",
         en_US: "Possible alarms found",
+      },
+      "Lukkeliste is ready": {
+        da_DK: "Lukkeliste klar",
+        en_US: "Valve list ready",
+      },
+      "Lukkeliste not ready": {
+        da_DK: "Lukkeliste ikke klar",
+        en_US: "Valve list not ready",
       },
     };
 
@@ -458,6 +466,7 @@ module.exports = {
           user_alarmkabel: null,
           user_alarmkabel_distance: config.extensionConfig.blueidea.alarmkabel_distance || 100,
           selected_profileid: '',
+          lukkeliste_ready: false,
         };
       }
 
@@ -603,7 +612,8 @@ module.exports = {
                   user_ventil_layer_key: data.ventil_layer_key || null,
                   user_ventil_export: data.ventil_export || null,
                   selected_profileid: userProfiles[0] || '',
-                  user_alarmkabel: data.alarmkabel
+                  user_alarmkabel: data.alarmkabel,
+                  lukkeliste_ready: data.lukkestatus.views_exists || false,
                 });
                 resolve(data);
               },
@@ -720,7 +730,7 @@ module.exports = {
               try {
                 let merged = this.mergeMatrikler(results);
                 this.addMatrsToMap(merged);
-                me.createSnack(__("Found parcels"), true);
+                me.createSnack(__("Found parcels"));
 
                 return merged;
               } catch (error) {
@@ -737,7 +747,7 @@ module.exports = {
 
               Promise.all(promises2).then((results) => {
                 let adresser = this.mergeAdresser(results);
-                me.createSnack(__("Found addresses"), true);
+                me.createSnack(__("Found addresses"));
 
                 //console.debug("Got addresses", adresser);
                 // Set results
@@ -748,7 +758,11 @@ module.exports = {
                 });
 
                 return;
-              });
+              })
+            })
+            .then(() => {
+              // show last snackbar;
+              me.createSnack(__("Show results"));
             })
             .catch((error) => {
               console.debug(error);
@@ -1190,6 +1204,7 @@ module.exports = {
               }
             })
             .catch((error) => {
+              me.createSnack(__("Error in seach") + ": " + error);
               console.warn(error);
               return
             });
@@ -1246,8 +1261,14 @@ module.exports = {
               if (data) {
                 // console.debug(data);                
                 me.addAlarmPositionToMap(data.alarm);
-                return
               }
+
+              // Add the clicked point to the map
+              if (data.log) {
+                //console.debug("Got log:", data.log);
+                me.addSelectedPointToMap(data.log);
+              }
+              return
             })
             .catch((error) => {
               me.createSnack(__("Error in seach") + ": " + error);
@@ -1623,7 +1644,17 @@ module.exports = {
             <div role="tabpanel">
               <div className="form-group p-3">
                 <div style={{ alignSelf: "center" }}>
-                  <h4>{__("Select area")}</h4>
+                  <h6>
+                    {__("Select area")} 
+                    {
+                    s.lukkeliste_ready && this.allowLukkeliste() &&
+                      <span class="mx-2 badge bg-success">{__("Lukkeliste is ready")}</span>
+                    }
+                    {
+                    !s.lukkeliste_ready && this.allowLukkeliste() &&
+                      <span class="mx-2 badge bg-danger">{__("Lukkeliste not ready")}</span>
+                    }
+                  </h6>
                   <div className="d-grid mx-auto gap-3">
                     <button
                       onClick={() => this.clickDraw()}
@@ -1644,7 +1675,7 @@ module.exports = {
 
                 <div className="row">
                   <div className="col">
-                    <h4>{__("Show results")}</h4>
+                    <h6>{__("Show results")}</h6>
                     <div className="d-flex align-items-center justify-content-between">
                       <span>Der blev fundet {Object.keys(s.results_adresser).length} adresser i området.</span>                            
                       <button 
@@ -1695,7 +1726,7 @@ module.exports = {
                   style={{ alignSelf: "center" }}
                   hidden={!s.user_lukkeliste}
                 >
-                  <h4>{__("Valve list")}</h4>
+                  <h6>{__("Valve list")}</h6>
                   <div className="d-grid mx-auto gap-3">
                     <button
                       onClick={() => this.downloadVentiler()}
@@ -1711,7 +1742,7 @@ module.exports = {
                   style={{ alignSelf: "center" }}
                   hidden={!s.user_alarmkabel}
                 >
-                  <h4>{__("Alarm cable")}</h4>
+                  <h6>{__("Alarm cable")}</h6>
                   <div className="row mx-auto gap-3">
                     <input
                       type="number"

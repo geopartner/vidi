@@ -103,3 +103,4 @@ Den bruger der tænkes at bruge lukkeliste-værktøjerne skal have en rolle med 
 - `lukkeliste.beregn_afskaaretmatrikler`
 - `lukkeliste.beregn_afskaaretnet`
 - `lukkeliste.beregnlog`
+- `lukkeliste.lukkestatus`

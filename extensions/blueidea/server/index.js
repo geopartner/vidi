@@ -107,13 +107,16 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
     SQLAPI("select * from lukkeliste.beregn_afskaaretmatrikler limit 1", req),
     SQLAPI("select * from lukkeliste.beregn_afskaaretnet limit 1", req),
     SQLAPI("select * from lukkeliste.beregnlog limit 1", req),
+    SQLAPI("select * from lukkeliste.lukkestatus limit 1", req),
   ];
   Promise.all(validate)
     .then((res) => {
       returnobj.db = true;
+      returnobj.lukkestatus = res[4].features[0].properties;
     })
     .catch((err) => {
       returnobj.db = false;
+      returnobj.lukkestaus = res[4].features[0].properties;
     })
     .finally(() => {
       response.status(200).json(returnobj);
@@ -238,12 +241,21 @@ router.post("/api/extension/alarmkabel/:userid/query",
           )
         );
 
+        // get log
+        promises.push(
+          SQLAPI(
+            `SELECT * from lukkeliste.beregnlog where beregnuuid = '${beregnuuid}'`,
+            req,
+            { format: "geojson", srs: 4326 }
+          )
+        );
+
         // when promises are complete, return the result
         Promise.all(promises)
           .then((res) => {
             response.status(200).json({
               alarm: res[0],
-              log: [],
+              log: res[1],
             });
           })
           .catch((err) => {
