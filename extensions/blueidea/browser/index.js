@@ -1667,7 +1667,7 @@ module.exports = {
                     {__("Download addresses")}
                   </button>
 
-                  {s.user_profileid &&
+                  {s.user_profileid && this.profileidOptions().length > 1 &&
                     <select
                       onChange={this.setSelectedProfileid}
                       value={s.selected_profileid}
