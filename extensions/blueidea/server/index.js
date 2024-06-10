@@ -116,7 +116,7 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
     })
     .catch((err) => {
       returnobj.db = false;
-      returnobj.lukkestaus = res[4].features[0].properties;
+      returnobj.lukkestatus = res[4].features[0].properties;
     })
     .finally(() => {
       response.status(200).json(returnobj);
