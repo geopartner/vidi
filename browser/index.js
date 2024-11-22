@@ -21,6 +21,9 @@ function ಠ_ಠ() {
 /**
  * Global i18n dict
  */
+if (window._vidiLocale === undefined) {
+    window._vidiLocale = 'da_DK';
+}
 window.gc2i18n = require('./i18n/' + window._vidiLocale + '.js');
 
 /**
