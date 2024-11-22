@@ -23,6 +23,7 @@ module.exports = {
   gc2: {
     host: "https://mapgogc2.geopartner.dk",
   },
+  autoUpdate: true,
 
   // ===============================================================
   // Limits for puppeteer processes
