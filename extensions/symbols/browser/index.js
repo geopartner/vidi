@@ -409,7 +409,7 @@ module.exports = {
             // _self.off();
         });
 
-        utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "bi bi-flower1", false, exId);
+        utils.createMainTab(exId, __("Symbols"), __("Symbols_Info"), require('./../../../browser/modules/height')().max, "bi bi-signpost-2", false, exId);
 
         const gui = `
                       <div class="symbol-tools d-flex gap-4 align-items-center mb-4">

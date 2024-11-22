@@ -485,7 +485,11 @@ module.exports = {
         "Method": "Metode",
         "Find me": "Find mig",
 
-        "Symbols": "Symboler",
+        "Symbols": "Skilteplan",
+        "Locked": "Låst",
+        "Lock": "Lås",
+        "Symbols_Info": "Vælg en fane med skilte, og træk det ønskede skilt over i kortet. Herefter kan skiltet flyttes, roteres og skaleres.",
+        "Auto scale": "Autoskalering",
 
         // Sign in
         "User name": "Brugernavn",
