@@ -2781,7 +2781,8 @@ module.exports = {
         };
 
         // Reverse subgroups
-        reverseOrder(notSortedLayersAndSubgroupsForCurrentGroup);
+        // RGB - we really want default desc order
+        // reverseOrder(notSortedLayersAndSubgroupsForCurrentGroup);
 
         // Sort groups
         let layersAndSubgroupsForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup, groupName);
