@@ -59,4 +59,9 @@
 
 [data-bs-theme="light"] .toast-body {
     color: var(--bs-white);
+} 
+
+/* fix for typeahead beeing duplicated */
+input.custom-search.typeahead.form-control.tt-hint {
+    display: none;
 }
