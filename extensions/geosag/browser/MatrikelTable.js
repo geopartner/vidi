@@ -63,9 +63,17 @@ class MatrikelTable extends React.Component {
                         className="btn"
                         onClick={this._handleFocus.bind(this, matr)}
                         disabled={!matr.hasGeometry}
+                        hidden={!matr.hasGeometry}
                         title="Vis matrikel i kortet"
                       >
                         <i className="bi bi-search"></i>
+                      </button>
+                      <button
+                        className="btn"
+                        hidden={matr.hasGeometry}
+                        title="Udgået matrikel. Kan ikke vises i kortet."
+                      >
+                        <i className="bi bi-calendar-x"></i>
                       </button>
                       <button
                         className="btn"

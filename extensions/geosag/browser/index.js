@@ -760,12 +760,30 @@ module.exports = {
           _self
             .resolveMatrikel(id)
             .then((feat) => {
-              //console.log(feat);
-              feat.properties.key =
-                feat.properties.ejerlavkode + feat.properties.matrikelnr;
-              feat.properties.hasGeometry = feat.hasOwnProperty("geometry");
 
-              //console.log(feat);
+              // if no feature, we need to add a shell without geometry.
+              // this can happen when the matrikel is no longer in use.
+              if (!feat) {
+                feat = {
+                  type: "Feature",
+                  properties: {
+                    key: id.customData.matrnrcustom + id.customData.ejerlavskode,
+                    matrikelnr: id.customData.matrnrcustom,
+                    ejerlavkode: id.customData.ejerlavskode,
+                    ejerlavsnavn: id.lastName,
+                    kommunekode: id.customData.kommunenr,
+                    kommunenavn: id.customData.matrkomnavn,
+                    bfenummer: id.customData.matrsfenr,
+                    hasGeometry: false,
+                  },
+                  geometry: null,
+                };
+              } else {
+                feat.properties.key =
+                  feat.properties.ejerlavkode + feat.properties.matrikelnr;
+                feat.properties.hasGeometry = feat.hasOwnProperty("geometry");
+              }
+
               if (addToList) {
                 _self.addMatrikelToList(feat.properties);
               }
