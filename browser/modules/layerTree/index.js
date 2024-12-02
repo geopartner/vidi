@@ -4159,7 +4159,6 @@ module.exports = {
                 const el = document.querySelector(searchPath);
                 if (el) {
                     el.indeterminate = activeLayersInSubGroups > 0 && !(activeLayersInSubGroups === layersInSubGroups);
-                    //el.checked = activeLayersInSubGroups === layersInSubGroups;
                     el.checked = activeLayersInSubGroups > 0;
                 }
                 split.pop();
