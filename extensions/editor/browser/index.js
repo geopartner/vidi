@@ -442,7 +442,11 @@ module.exports = {
                     uiSchema[key] = {
                         'ui:widget': 'select'
                     };
-                    properties[key].type = `string`;
+
+                    // if the type is text, then the field is a select
+                    if (fields[key].type === `text`) {
+                        properties[key].type = `string`;
+                    }
 
                     let restrictions = fields[key].restriction;
                     let enumNames = [];
