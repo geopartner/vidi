@@ -120,14 +120,6 @@ module.exports = {
             fadeInMenu(fadeWhenDraggingClass);
         });
 
-        cloud.get().on('zoomstart', function () {
-            fadeOutMenu(fadeWhenDraggingClass);
-        });
-
-        cloud.get().on('zoomend', function () {
-            fadeInMenu(fadeWhenDraggingClass);
-        });
-
         /**
          * Triggered when the layer control is changed in any module
          */
