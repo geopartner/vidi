@@ -5,7 +5,7 @@
     "sources": {
         "vector-source": {
             "type": "vector",
-            "tiles": ["https://api.dataforsyningen.dk/rest/skaermkort_vector_tiles/v1.0/EPSG:3857/EPSG:3857:{z}/{y}/{x}?f=application/vnd.mapbox-vector-tilefs"],
+            "tiles": ["https://api.dataforsyningen.dk/rest/skaermkort_vector_tiles/v1.0/EPSG:3857/EPSG:3857:{z}/{y}/{x}?f=application/vnd.mapbox-vector-tile&token=4aacd5977eb46ca012c260ecb608c65c"],
             "maxZoom": 20,
             "minZoom": 0
         }
