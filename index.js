@@ -119,13 +119,49 @@ app.enable('trust proxy');
 
 const port = process.env.PORT ? process.env.PORT : 3000;
 const server = http.createServer(app);
-if (!sticky.listen(server, port, {})) {
-    // Master code
-    server.once('listening', function () {
-        console.log(`server started on port ${port}`);
+
+try {
+    if (!sticky.listen(server, port, {})) {
+        // Master process
+        server.once('listening', function () {
+            console.log(`Server started successfully on port ${port}`);
+        });
+
+        // Handle server-level errors
+        server.on('error', (err) => {
+            if (err.code === 'EADDRINUSE') {
+                console.error(`Port ${port} is already in use. Please use a different port.`);
+            } else {
+                console.error('Server encountered an error:', err);
+            }
+            process.exit(1);
+        });
+
+        // Handle unexpected socket hang-ups
+        server.on('connection', (socket) => {
+            socket.on('error', (err) => {
+                console.error('Socket error:', err.message);
+            });
+        });
+    } else {
+        // Worker process
+        console.log(`Worker started: ${cluster.worker.id}`);
+    }
+
+    // Gracefully handle uncaught exceptions globally
+    process.on('uncaughtException', (err) => {
+        console.error('Uncaught Exception:', err.stack || err);
+        process.exit(1); // Exit the process after handling
     });
-} else {
-    console.log('worker: ' + cluster.worker.id);
+
+    // Gracefully handle unhandled promise rejections
+    process.on('unhandledRejection', (reason, promise) => {
+        console.error('Unhandled Rejection:', reason);
+        process.exit(1); // Exit the process after handling
+    });
+} catch (err) {
+    console.error('Unexpected error occurred:', err);
+    process.exit(1); // Exit with failure code
 }
 
 global.io = require('socket.io')(server);
