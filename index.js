@@ -119,44 +119,64 @@ app.enable('trust proxy');
 
 const port = process.env.PORT ? process.env.PORT : 3000;
 const server = http.createServer(app);
-if (!sticky.listen(server, port)) {
-    // Master thread
-    server.once('listening', () => {
-        console.log(`Master thread is handling server setup on port ${port}`);
-    });
 
-    console.log(`Master process PID: ${process.pid}`);
+// wrap sticky-session for debugging
+try {
 
-    // Handle uncaught exceptions in the master process
-    process.on('uncaughtException', (err) => {
-        console.error(`Master thread uncaught exception: ${err.message}`);
-        console.error(err.stack);
-        process.exit(1); // Exit the master process
-    });
+    if (!sticky.listen(server, port)) {
+        // Master thread
+        server.once('listening', () => {
+            console.log(`Master thread is handling server setup on port ${port}`);
+        });
 
-    process.on('unhandledRejection', (reason, promise) => {
-        console.error('Master thread unhandled promise rejection:', reason);
-        process.exit(1); // Exit the master process
-    });
-} else {
-    // Worker thread
-    console.log(`Worker started: ${cluster.worker.id}, PID: ${process.pid}`);
+        console.log(`Master process PID: ${process.pid}`);
 
-    // Handle uncaught exceptions in the worker process
-    process.on('uncaughtException', (err) => {
-        console.error(`Worker ${cluster.worker.id} uncaught exception: ${err.message}`);
-        console.error(err.stack);
-        process.exit(1); // Allow the master to restart the worker
-    });
+        // Handle uncaught exceptions in the master process
+        process.on('uncaughtException', (err) => {
+            console.error(`Master thread uncaught exception: ${err.message}`);
+            console.error(err.stack);
+            process.exit(1); // Exit the master process
+        });
 
-    process.on('unhandledRejection', (reason, promise) => {
-        console.error(`Worker ${cluster.worker.id} unhandled promise rejection:`, reason);
-        process.exit(1); // Allow the master to restart the worker
-    });
+        process.on('unhandledRejection', (reason, promise) => {
+            console.error('Master thread unhandled promise rejection:', reason);
+            process.exit(1); // Exit the master process
+        });
+    } else {
+        // Worker thread
+        console.log(`Worker started: ${cluster.worker.id}, PID: ${process.pid}`);
+
+        // Handle uncaught exceptions in the worker process
+        process.on('uncaughtException', (err) => {
+            console.error(`Worker ${cluster.worker.id} uncaught exception: ${err.message}`);
+            console.error(err.stack);
+            process.exit(1); // Allow the master to restart the worker
+        });
+
+        process.on('unhandledRejection', (reason, promise) => {
+            console.error(`Worker ${cluster.worker.id} unhandled promise rejection:`, reason);
+            process.exit(1); // Allow the master to restart the worker
+        });
+    }
+} catch (err) {
+    console.error('Error in sticky-session master balance:', err);
+    process.exit(1);
 }
+
+// listen to clientError events
+server.on('clientError', (err, socket) => {
+    console.error('Client error:', err.message);
+    socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+});
+
+// set a timeout on server connections
+server.setTimeout(30000, (socket) => {
+    console.warn('Request timeout: Closing socket');
+    socket.end();
+});
 
 
 global.io = require('socket.io')(server);
 io.on('connection', function (socket) {
-    console.log(socket.id);
+    console.log('io connected to:', socket.id);
 });
