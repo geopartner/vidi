@@ -120,6 +120,11 @@ app.enable('trust proxy');
 const port = process.env.PORT ? process.env.PORT : 3000;
 const server = http.createServer(app);
 
+server.timeout = 30000; // 30 seconds
+server.keepAliveTimeout = 10000; // 10 seconds
+server.headersTimeout = 45000; // 45 seconds
+
+
 // wrap sticky-session for debugging
 try {
 
