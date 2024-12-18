@@ -119,14 +119,42 @@ app.enable('trust proxy');
 
 const port = process.env.PORT ? process.env.PORT : 3000;
 const server = http.createServer(app);
-if (!sticky.listen(server, port, {})) {
-    // Master code
-    server.once('listening', function () {
-        console.log(`server started on port ${port}`);
+if (!sticky.listen(server, port)) {
+    // Master thread
+    server.once('listening', () => {
+        console.log(`Master thread is handling server setup on port ${port}`);
+    });
+
+    console.log(`Master process PID: ${process.pid}`);
+
+    // Handle uncaught exceptions in the master process
+    process.on('uncaughtException', (err) => {
+        console.error(`Master thread uncaught exception: ${err.message}`);
+        console.error(err.stack);
+        process.exit(1); // Exit the master process
+    });
+
+    process.on('unhandledRejection', (reason, promise) => {
+        console.error('Master thread unhandled promise rejection:', reason);
+        process.exit(1); // Exit the master process
     });
 } else {
-    console.log('worker: ' + cluster.worker.id);
+    // Worker thread
+    console.log(`Worker started: ${cluster.worker.id}, PID: ${process.pid}`);
+
+    // Handle uncaught exceptions in the worker process
+    process.on('uncaughtException', (err) => {
+        console.error(`Worker ${cluster.worker.id} uncaught exception: ${err.message}`);
+        console.error(err.stack);
+        process.exit(1); // Allow the master to restart the worker
+    });
+
+    process.on('unhandledRejection', (reason, promise) => {
+        console.error(`Worker ${cluster.worker.id} unhandled promise rejection:`, reason);
+        process.exit(1); // Allow the master to restart the worker
+    });
 }
+
 
 global.io = require('socket.io')(server);
 io.on('connection', function (socket) {
