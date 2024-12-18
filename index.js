@@ -169,22 +169,48 @@ server.on('clientError', (err, socket) => {
     socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
 });
 
-// set a timeout on server connections
-server.setTimeout(30000);
+// Log request details on 'request' event
+server.on('request', (req, res) => {
+    req.socket._httpRequestInfo = {
+        method: req.method,
+        url: req.url,
+        headers: req.headers,
+    };
+});
 
 // Listen for the 'timeout' event to log request details
-server.on('timeout', (req, socket) => {
+server.on('timeout', (socket) => {
+    // Log basic socket details
     console.warn('Request timeout:');
-    console.warn(`Method: ${req.method}`);
-    console.warn(`URL: ${req.url}`);
-    console.warn(`Headers: ${JSON.stringify(req.headers)}`);
     console.warn(`Client IP: ${socket.remoteAddress}`);
+    console.warn(`Client Port: ${socket.remotePort}`);
 
-    // Send HTTP 408 response and close the connection
+    // Retrieve the associated `req` if available
+    const req = socket._httpRequestInfo;
+
+    if (req) {
+        console.warn(`Method: ${req.method}`);
+        console.warn(`URL: ${req.url}`);
+        console.warn(`Headers: ${JSON.stringify(req.headers, null, 2)}`);
+    } else {
+        console.warn('Request details not available.');
+    }
+
+    // Close the socket with an HTTP 408 status
     if (!socket.destroyed) {
         socket.end('HTTP/1.1 408 Request Timeout\r\n\r\n');
     }
 });
+
+// set a timeout on server connections
+//server.setTimeout(300);
+//app.get('/timeout-test', (req, res) => {
+//    console.log('Simulating long-running request...');
+//    // Delay response beyond the server's timeout setting
+//    setTimeout(() => {
+//        res.send('This response is too late!');
+//    }, 500); // Delay longer than the server timeout (e.g., 30 seconds)
+//});
 
 
 global.io = require('socket.io')(server);
