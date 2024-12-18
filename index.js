@@ -182,8 +182,8 @@ server.on('request', (req, res) => {
 server.on('timeout', (socket) => {
     // Log basic socket details
     console.warn('Request timeout:');
-    console.warn(`Client IP: ${socket.remoteAddress}`);
-    console.warn(`Client Port: ${socket.remotePort}`);
+    //console.warn(`Client IP: ${socket.remoteAddress}`);
+    //console.warn(`Client Port: ${socket.remotePort}`);
 
     // Retrieve the associated `req` if available
     const req = socket._httpRequestInfo;
@@ -191,7 +191,11 @@ server.on('timeout', (socket) => {
     if (req) {
         console.warn(`Method: ${req.method}`);
         console.warn(`URL: ${req.url}`);
-        console.warn(`Headers: ${JSON.stringify(req.headers, null, 2)}`);
+        //console.warn(`Headers: ${JSON.stringify(req.headers, null, 2)}`);
+        
+        // print referer and x-real-ip from the headers if available
+        console.warn(`Referer: ${req.headers['referer']}`);
+        console.warn(`X-Real-IP: ${req.headers['x-real-ip']}`);
     } else {
         console.warn('Request details not available.');
     }
