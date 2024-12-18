@@ -170,9 +170,20 @@ server.on('clientError', (err, socket) => {
 });
 
 // set a timeout on server connections
-server.setTimeout(30000, (socket) => {
-    console.warn('Request timeout: Closing socket');
-    socket.end();
+server.setTimeout(30000);
+
+// Listen for the 'timeout' event to log request details
+server.on('timeout', (req, socket) => {
+    console.warn('Request timeout:');
+    console.warn(`Method: ${req.method}`);
+    console.warn(`URL: ${req.url}`);
+    console.warn(`Headers: ${JSON.stringify(req.headers)}`);
+    console.warn(`Client IP: ${socket.remoteAddress}`);
+
+    // Send HTTP 408 response and close the connection
+    if (!socket.destroyed) {
+        socket.end('HTTP/1.1 408 Request Timeout\r\n\r\n');
+    }
 });
 
 
