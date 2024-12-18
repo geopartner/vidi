@@ -16,7 +16,9 @@ router.get('/api/datafordeler/*', (req, response) => {
     let creds = token ? `&token=${token}` : `&username=${userName}&password=${pwd}`;
     let requestURL = host + decodeURIComponent(req.url.substr(17)) + creds;
     requestURL = requestURL.replace('false', 'FALSE');
-    get(requestURL, response);
+
+    //get(requestURL, response);
+    response.redirect(requestURL);
 });
 router.get('/api/dataforsyningen/*', (req, response) => {
     const userName = require('../config/config.js')?.df?.dataforsyningen?.username;
@@ -26,7 +28,9 @@ router.get('/api/dataforsyningen/*', (req, response) => {
     let creds = token ? `&token=${token}` : `&username=${userName}&password=${pwd}`;
     let requestURL = host + decodeURIComponent(req.url.substr(20)) + creds;
     requestURL = requestURL.replace('false', 'FALSE')
-    get(requestURL, response);
+    
+    //get(requestURL, response);
+    response.redirect(requestURL);
 });
 
 const get = (url, res) => {
