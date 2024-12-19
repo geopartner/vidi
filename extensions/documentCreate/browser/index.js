@@ -249,7 +249,7 @@ var getExistingDocs = function (key, fileIdent = false) {
       }
 
       // load the layer
-      turnOnLayer(conf.table);
+      turnOnLayer('vmr.' + conf.table);
     });
   }
 
@@ -1858,7 +1858,7 @@ module.exports = {
               <div id="documentCreate-feature-content" className="collapse">
                 <h6>{__("Pick location")}</h6>
                 <div id="documentCreate-places d-flex" className="places">
-                  <div class="input-group mb-3">
+                  <div className="input-group mb-3">
                     <input
                       id={id}
                       className={id + " typeahead"}
@@ -1866,11 +1866,11 @@ module.exports = {
                       placeholder="Adresse"
                     />
                     <button
-                      class="btn btn-outline-secondary searchclear"
+                      className="btn btn-outline-secondary searchclear"
                       type="button"
                       onClick={() => $("#" + id).val("")}
                     >
-                      <i class="bi bi-x-lg"></i>
+                      <i className="bi bi-x-lg"></i>
                     </button>
                   </div>
                 </div>
