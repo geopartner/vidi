@@ -120,11 +120,6 @@ app.enable('trust proxy');
 const port = process.env.PORT ? process.env.PORT : 3000;
 const server = http.createServer(app);
 
-server.timeout = 30000; // 30 seconds
-server.keepAliveTimeout = 10000; // 10 seconds
-server.headersTimeout = 45000; // 45 seconds
-
-
 // wrap sticky-session for debugging
 try {
 
@@ -136,31 +131,29 @@ try {
 
         console.log(`Master process PID: ${process.pid}`);
 
-        // Handle uncaught exceptions in the master process
         process.on('uncaughtException', (err) => {
-            console.error(`Master thread uncaught exception: ${err.message}`);
+            console.error(`[${new Date().toISOString()}] Master: Uncaught Exception: ${err.message}`);
             console.error(err.stack);
-            process.exit(1); // Exit the master process
+            process.exit(1); // Exit process to restart
         });
-
+        
         process.on('unhandledRejection', (reason, promise) => {
-            console.error('Master thread unhandled promise rejection:', reason);
-            process.exit(1); // Exit the master process
+            console.error(`[${new Date().toISOString()}] Master: Unhandled Promise Rejection:`, reason);
+            console.error(`Promise:`, promise);
         });
     } else {
         // Worker thread
         console.log(`Worker started: ${cluster.worker.id}, PID: ${process.pid}`);
 
-        // Handle uncaught exceptions in the worker process
         process.on('uncaughtException', (err) => {
-            console.error(`Worker ${cluster.worker.id} uncaught exception: ${err.message}`);
+            console.error(`[${new Date().toISOString()}] Worker: Uncaught Exception: ${err.message}`);
             console.error(err.stack);
-            process.exit(1); // Allow the master to restart the worker
+            process.exit(1); // Exit process to restart
         });
-
+        
         process.on('unhandledRejection', (reason, promise) => {
-            console.error(`Worker ${cluster.worker.id} unhandled promise rejection:`, reason);
-            process.exit(1); // Allow the master to restart the worker
+            console.error(`[${new Date().toISOString()}] Worker:  Unhandled Promise Rejection:`, reason);
+            console.error(`Promise:`, promise);
         });
     }
 } catch (err) {
@@ -183,46 +176,40 @@ server.on('request', (req, res) => {
     };
 });
 
-// Listen for the 'timeout' event to log request details
-server.on('timeout', (socket) => {
-    // Log basic socket details
-    console.warn('Request timeout:');
-    //console.warn(`Client IP: ${socket.remoteAddress}`);
-    //console.warn(`Client Port: ${socket.remotePort}`);
-
-    // Retrieve the associated `req` if available
-    const req = socket._httpRequestInfo;
-
-    if (req) {
-        console.warn(`Method: ${req.method}`);
-        console.warn(`URL: ${req.url}`);
-        //console.warn(`Headers: ${JSON.stringify(req.headers, null, 2)}`);
-        
-        // print referer and x-real-ip from the headers if available
-        console.warn(`Referer: ${req.headers['referer']}`);
-        console.warn(`X-Real-IP: ${req.headers['x-real-ip']}`);
-    } else {
-        console.warn('Request details not available.');
-    }
-
-    // Close the socket with an HTTP 408 status
-    if (!socket.destroyed) {
-        socket.end('HTTP/1.1 408 Request Timeout\r\n\r\n');
-    }
+// Middleware to catch errors and log details
+app.use((err, req, res, next) => {
+    console.error(`[${new Date().toISOString()}] Error in request: ${req.method} ${req.url}`);
+    console.error(`Error Message: ${err.message}`);
+    console.error(`Stack Trace: ${err.stack}`);
+    res.status(err.status || 500).json({ error: err.message });
 });
 
-// set a timeout on server connections
-//server.setTimeout(300);
-//app.get('/timeout-test', (req, res) => {
-//    console.log('Simulating long-running request...');
-//    // Delay response beyond the server's timeout setting
-//    setTimeout(() => {
-//        res.send('This response is too late!');
-//    }, 500); // Delay longer than the server timeout (e.g., 30 seconds)
-//});
 
+server.on('clientError', (err, socket) => {
+    console.error(`[${new Date().toISOString()}] Client error: ${err.message}`);
+    if (socket._httpRequestInfo) {
+        console.error(`Request Info:`, socket._httpRequestInfo);
+    }
+    socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+});
+
+// Middleware to track request timeouts
+app.use((req, res, next) => {
+    req.on('timeout', () => {
+        console.error(`[${new Date().toISOString()}] Request timeout: ${req.method} ${req.url}`);
+    });
+    next();
+});
 
 global.io = require('socket.io')(server);
-io.on('connection', function (socket) {
-    console.log('io connected to:', socket.id);
+io.on('connection', (socket) => {
+    console.log(`[${new Date().toISOString()}] WebSocket connected: ${socket.id}`);
+
+    socket.on('error', (err) => {
+        console.error(`[${new Date().toISOString()}] WebSocket error on socket ${socket.id}: ${err.message}`);
+    });
+
+    socket.on('disconnect', (reason) => {
+        console.log(`[${new Date().toISOString()}] WebSocket disconnected: ${socket.id}, Reason: ${reason}`);
+    });
 });

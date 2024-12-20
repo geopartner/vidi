@@ -548,6 +548,20 @@ var turnOnLayer = (layer, filter = null) => {
     return;
   }
 
+  // if metadata array does not have data, return
+  if (meta.getMetaData().data.length == 0) {
+    return;
+  } else {
+    console.log("meta is loaded");
+  }
+
+  console.log("isOn", isOn(layer));
+
+  // if the layer is on the map, and the filter is empty, return
+  if (isOn(layer) && !filter) {
+    return;
+  }
+
   // if the layer is not on the map, anf the filter is empty, turn it on
   switchLayer.init(layer, true).then(() => {
     // if the filter is not empty, apply it, and refresh the layer
@@ -1167,7 +1181,7 @@ var FeatureFormFactory = function (order) {
 
   //Then add a button
   $("#" + form_id).append(
-    '<button id="submitbtn" type="submit" class="btn btn-primary">' +
+    '<button id="submitbtn" type="submit" class="btn btn-outline-secondary">' +
       __("Indsend") +
       "</button>"
   );
@@ -1555,10 +1569,6 @@ module.exports = {
         // Activates module
         backboneEvents.get().on(`on:${exId}`, () => {
           console.log("Starting documentCreate");
-
-          /*
-                    backboneEvents.get().trigger("refresh:meta");
-                    */
           me.setState({
             active: true,
           });
@@ -1569,11 +1579,12 @@ module.exports = {
             // Vidi trigger til print for total indlæsning af kort
             console.log("all_loaded is set, starting for real");
             // load with filters
-            loadAndInitFilters(me.state.active);
+            setTimeout(() => {
+              loadAndInitFilters(me.state.active);
+            }, 2000);
           }
         });
 
-        // Deactivates module
         backboneEvents.get().on(`off:${exId} off:all reset:all`, () => {
           console.log("Stopping documentCreate");
           me.setState({
@@ -1663,7 +1674,7 @@ module.exports = {
 
                     // run method here in order to support switch in event order, when running
                     // extension along with the session object autoLogin feature
-                    loadAndInitFilters(me.state.active);
+                    //loadAndInitFilters(me.state.active);
                   } else {
                     // disable all controls
                     // notify, no user is logged in
@@ -1850,7 +1861,7 @@ module.exports = {
                 <button
                   type="button"
                   onClick={this.newButtonClicked}
-                  className="btn btn-primary"
+                  className="btn btn-outline-secondary"
                 >
                   {__("NewButton")}
                 </button>
@@ -1866,7 +1877,7 @@ module.exports = {
                       placeholder="Adresse"
                     />
                     <button
-                      className="btn btn-outline-secondary searchclear"
+                      className="btn btn-outline-secondary-secondary searchclear"
                       type="button"
                       onClick={() => $("#" + id).val("")}
                     >
@@ -1894,14 +1905,14 @@ module.exports = {
                 <button
                   type="button"
                   onClick={this.editButtonClicked}
-                  className="btn btn-primary"
+                  className="btn btn-outline-secondary"
                 >
                   {__("EditButton")}
                 </button>
                 <button
                   type="button"
                   onClick={(fileident) => this.saveButtonClicked(fileident)}
-                  className="btn btn-primary"
+                  className="btn btn-outline-secondary"
                 >
                   {__("SaveEditButton")}
                 </button>
