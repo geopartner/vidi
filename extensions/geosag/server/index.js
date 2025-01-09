@@ -313,7 +313,7 @@ function createMatrikelPart(matr) {
       synchronizeSource: dn.synchronizeSource,
       listId: dn.personListId,
       customData: {
-        ejerlavskode: matr.ejerlavskode,
+        ejerlavskode: matr.ejerlavkode,
         kommunenr: matr.kommunekode == "-" ? null : matr.kommunekode,
         matresrnr: matr.esr == "-" ? null : matr.esr,
         matrkomnavm: matr.kommune == "-" ? null : matr.kommune,
