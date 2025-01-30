@@ -650,7 +650,10 @@ function getFoldersDn(caseid, nodetype) {
       userKey: USERKEY,
       userName: USERNAME,
     },
+    proxy: process.env.HTTPS_PROXY,
   };
+  console.table('getFoldersDn:', dnoptions);
+
   return new Promise(function (resolve, reject) {
     request.get(dnoptions, function (err, res, body) {
       if (!err) {
@@ -708,7 +711,7 @@ function getParentCaseDnESR(esrnr) {
     },
   };
 
-  console.log(dnoptions.url)
+  console.table('getParentCaseDnESR:', dnoptions);
 
   return new Promise(function (resolve, reject) {
     request.get(dnoptions, function (err, res, body) {
@@ -739,7 +742,7 @@ function getParentCaseDnBFE(bfenr) {
     },
   };
 
-  console.log(dnoptions.url)
+  console.table('getParentCaseDnBFE:', dnoptions);
 
   return new Promise(function (resolve, reject) {
     request.get(dnoptions, function (err, res, body) {
@@ -767,7 +770,10 @@ function getPartId(partsyncid) {
       userKey: USERKEY,
       userName: USERNAME,
     },
+    proxy: process.env.HTTPS_PROXY,
   };
+  console.table('getPartId:', options);
+  
   // Return new promise
   return new Promise(function (resolve, reject) {
     // Do async job
@@ -805,8 +811,7 @@ function postToGC2(req, db) {
         ".the_geom" +
         "/4326",
       body: postData,
-      method: "POST",
-      proxy: process.env.HTTPS_PROXY
+      method: "POST"
     };
   return new Promise(function (resolve, reject) {
     request(options, function (err, resp, body) {
@@ -836,6 +841,8 @@ function postCompanyToDn(compbody) {
       },
       proxy: process.env.HTTPS_PROXY,
     };
+  console.table('postCompanyToDn:', options);
+
   return new Promise(function (resolve, reject) {
     var req = https.request(options, function (res) {
       var chunks = [];
@@ -884,6 +891,7 @@ function postCaseToDn(casebody) {
       },
       proxy: process.env.HTTPS_PROXY
     };
+  console.table('postCaseToDn:', options);
 
   if (DONTPOST) {
     return new Promise(function (resolve, reject) {
@@ -939,6 +947,8 @@ function putPartToCaseDn(partbody, caseId) {
       },
       proxy: process.env.HTTPS_PROXY
     };
+  console.table('putPartToCaseDn:', options);
+
   if (DONTPOST) {
     return new Promise(function (resolve, reject) {
       setTimeout(function () {
@@ -987,7 +997,9 @@ function ReqToDn(requrl) {
       userKey: USERKEY,
       userName: USERNAME,
     },
+    proxy: process.env.HTTPS_PROXY,
   };
+  console.log('ReqToDn:', options);
   // Return new promise
   return new Promise(function (resolve, reject) {
     // Do async job
