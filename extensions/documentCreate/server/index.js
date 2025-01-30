@@ -2,8 +2,6 @@ var express = require("express");
 //var request = require('then-request');
 var request = require("request");
 var router = express.Router();
-var http = require("http");
-var https = require("https");
 var fs = require("fs");
 var moment = require("moment");
 var config = require("../../../config/config.js");
@@ -650,7 +648,6 @@ function getFoldersDn(caseid, nodetype) {
       userKey: USERKEY,
       userName: USERNAME,
     },
-    //proxy: process.env.HTTPS_PROXY,
   };
   console.log('getFoldersDn:', dnoptions);
 
@@ -770,7 +767,6 @@ function getPartId(partsyncid) {
       userKey: USERKEY,
       userName: USERNAME,
     },
-    //proxy: process.env.HTTPS_PROXY,
   };
   console.log('getPartId:', options);
   
@@ -829,9 +825,8 @@ function postToGC2(req, db) {
 function postCompanyToDn(compbody) {
   var postData = JSON.stringify(compbody),
     options = {
+      url: "https://docunoteapi.vmr.dk/api/v1/Companies",
       method: "POST",
-      host: "docunoteapi.vmr.dk",
-      path: "/api/v1/Companies",
       headers: {
         "Content-Type": "application/json",
         "Content-Length": Buffer.byteLength(postData),
@@ -839,38 +834,24 @@ function postCompanyToDn(compbody) {
         userKey: USERKEY,
         userName: USERNAME,
       },
-      //proxy: process.env.HTTPS_PROXY,
+      body: postData,
     };
   console.log('postCompanyToDn:', options);
 
   return new Promise(function (resolve, reject) {
-    var req = https.request(options, function (res) {
-      var chunks = [];
-      //response.header('content-type', 'text/plain');
-      res.on("error", function (e) {
-        console.log(e);
-        reject(e);
-      });
-      res.on("data", function (chunk) {
-        chunks.push(chunk);
-        //console.log('Response: ' + chunk);
-      });
-      res.on("end", function () {
-        var jsfile = new Buffer.concat(chunks);
-        //chunks = Buffer.concat(chunks).toString;
-        //response.send(jsfile);
-
-        //console.log(JSON.parse(jsfile));
-        if ("errorCode" in JSON.parse(jsfile)) {
-          //reject(JSON.parse(jsfile))
-          reject(JSON.parse(jsfile));
+    request(options, function (err, res, body) {
+      if (err) {
+        console.log(err);
+        reject(err);
+      } else {
+        var jsfile = JSON.parse(body);
+        if ("errorCode" in jsfile) {
+          reject(jsfile);
         } else {
-          resolve(JSON.parse(jsfile));
+          resolve(jsfile);
         }
-      });
+      }
     });
-    req.write(postData, "utf8");
-    req.end();
   });
 }
 
@@ -879,9 +860,8 @@ function postCompanyToDn(compbody) {
 function postCaseToDn(casebody) {
   var postData = JSON.stringify(casebody),
     options = {
+      url: "https://docunoteapi.vmr.dk/api/v1/Cases",
       method: "POST",
-      host: "docunoteapi.vmr.dk",
-      path: "/api/v1/Cases",
       headers: {
         "Content-Type": "application/json",
         "Content-Length": Buffer.byteLength(postData),
@@ -889,7 +869,7 @@ function postCaseToDn(casebody) {
         userKey: USERKEY,
         userName: USERNAME,
       },
-      //proxy: process.env.HTTPS_PROXY
+      body: postData,
     };
   console.log('postCaseToDn:', options);
 
@@ -901,33 +881,19 @@ function postCaseToDn(casebody) {
     });
   } else {
     return new Promise(function (resolve, reject) {
-      var req = https.request(options, function (res) {
-        var chunks = [];
-        //response.header('content-type', 'text/plain');
-        res.on("error", function (e) {
-          console.log(e);
-          reject(e);
-        });
-        res.on("data", function (chunk) {
-          chunks.push(chunk);
-          console.log('Response: ' + chunk);
-        });
-        res.on("end", function () {
-          var jsfile = new Buffer.concat(chunks);
-          //chunks = Buffer.concat(chunks).toString;
-          //response.send(jsfile);
-
-          console.log(JSON.parse(jsfile))
-          if ("ErrorCode" in JSON.parse(jsfile)) {
-            reject(JSON.parse(jsfile));
-            //resolve(JSON.parse(jsfile));
+      request(options, function (err, res, body) {
+        if (err) {
+          console.log(err);
+          reject(err);
+        } else {
+          var jsfile = JSON.parse(body);
+          if ("errorCode" in jsfile) {
+            reject(jsfile);
           } else {
-            resolve(JSON.parse(jsfile));
+            resolve(jsfile);
           }
-        });
+        }
       });
-      req.write(postData, "utf8");
-      req.end();
     });
   }
 }
@@ -935,9 +901,8 @@ function postCaseToDn(casebody) {
 function putPartToCaseDn(partbody, caseId) {
   var postData = JSON.stringify(partbody),
     options = {
+      url: "https://docunoteapi.vmr.dk/api/v1/Cases/" + caseId + "/pickers",
       method: "POST",
-      host: "docunoteapi.vmr.dk",
-      path: "/api/v1/Cases/" + caseId + "/pickers",
       headers: {
         "Content-Type": "application/json",
         "Content-Length": Buffer.byteLength(postData),
@@ -945,7 +910,7 @@ function putPartToCaseDn(partbody, caseId) {
         userKey: USERKEY,
         userName: USERNAME,
       },
-      //proxy: process.env.HTTPS_PROXY
+      body: postData,
     };
   console.log('putPartToCaseDn:', options);
 
@@ -957,33 +922,19 @@ function putPartToCaseDn(partbody, caseId) {
     });
   } else {
     return new Promise(function (resolve, reject) {
-      var req = https.request(options, function (res) {
-        var chunks = [];
-        //response.header('content-type', 'text/plain');
-        res.on("error", function (e) {
-          console.log(e);
-          reject(e);
-        });
-        res.on("data", function (chunk) {
-          chunks.push(chunk);
-          //console.log('Response: ' + chunk);
-        });
-        res.on("end", function () {
-          var jsfile = new Buffer.concat(chunks);
-          //chunks = Buffer.concat(chunks).toString;
-          //response.send(jsfile);
-
-          //console.log(JSON.parse(jsfile))
-          if ("errorCode" in JSON.parse(jsfile)) {
-            reject(JSON.parse(jsfile));
-            //resolve(JSON.parse(jsfile));
+      request(options, function (err, res, body) {
+        if (err) {
+          console.log(err);
+          reject(err);
+        } else {
+          var jsfile = JSON.parse(body);
+          if ("errorCode" in jsfile) {
+            reject(jsfile);
           } else {
-            resolve(JSON.parse(jsfile));
+            resolve(jsfile);
           }
-        });
+        }
       });
-      req.write(postData, "utf8");
-      req.end();
     });
   }
 }
@@ -996,8 +947,7 @@ function ReqToDn(requrl) {
       applicationKey: APPKEY,
       userKey: USERKEY,
       userName: USERNAME,
-    },
-    //proxy: process.env.HTTPS_PROXY,
+    }
   };
   console.log('ReqToDn:', options);
   // Return new promise
