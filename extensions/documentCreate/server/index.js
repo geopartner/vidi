@@ -910,14 +910,14 @@ function postCaseToDn(casebody) {
         });
         res.on("data", function (chunk) {
           chunks.push(chunk);
-          //console.log('Response: ' + chunk);
+          console.log('Response: ' + chunk);
         });
         res.on("end", function () {
           var jsfile = new Buffer.concat(chunks);
           //chunks = Buffer.concat(chunks).toString;
           //response.send(jsfile);
 
-          //console.log(JSON.parse(jsfile))
+          console.log(JSON.parse(jsfile))
           if ("ErrorCode" in JSON.parse(jsfile)) {
             reject(JSON.parse(jsfile));
             //resolve(JSON.parse(jsfile));
