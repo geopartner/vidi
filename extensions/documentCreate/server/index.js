@@ -652,7 +652,7 @@ function getFoldersDn(caseid, nodetype) {
     },
     proxy: process.env.HTTPS_PROXY,
   };
-  console.table('getFoldersDn:', dnoptions);
+  console.log('getFoldersDn:', dnoptions);
 
   return new Promise(function (resolve, reject) {
     request.get(dnoptions, function (err, res, body) {
@@ -711,7 +711,7 @@ function getParentCaseDnESR(esrnr) {
     },
   };
 
-  console.table('getParentCaseDnESR:', dnoptions);
+  console.log('getParentCaseDnESR:', dnoptions);
 
   return new Promise(function (resolve, reject) {
     request.get(dnoptions, function (err, res, body) {
@@ -742,7 +742,7 @@ function getParentCaseDnBFE(bfenr) {
     },
   };
 
-  console.table('getParentCaseDnBFE:', dnoptions);
+  console.log('getParentCaseDnBFE:', dnoptions);
 
   return new Promise(function (resolve, reject) {
     request.get(dnoptions, function (err, res, body) {
@@ -772,7 +772,7 @@ function getPartId(partsyncid) {
     },
     proxy: process.env.HTTPS_PROXY,
   };
-  console.table('getPartId:', options);
+  console.log('getPartId:', options);
   
   // Return new promise
   return new Promise(function (resolve, reject) {
@@ -841,7 +841,7 @@ function postCompanyToDn(compbody) {
       },
       proxy: process.env.HTTPS_PROXY,
     };
-  console.table('postCompanyToDn:', options);
+  console.log('postCompanyToDn:', options);
 
   return new Promise(function (resolve, reject) {
     var req = https.request(options, function (res) {
@@ -891,7 +891,7 @@ function postCaseToDn(casebody) {
       },
       proxy: process.env.HTTPS_PROXY
     };
-  console.table('postCaseToDn:', options);
+  console.log('postCaseToDn:', options);
 
   if (DONTPOST) {
     return new Promise(function (resolve, reject) {
@@ -947,7 +947,7 @@ function putPartToCaseDn(partbody, caseId) {
       },
       proxy: process.env.HTTPS_PROXY
     };
-  console.table('putPartToCaseDn:', options);
+  console.log('putPartToCaseDn:', options);
 
   if (DONTPOST) {
     return new Promise(function (resolve, reject) {
