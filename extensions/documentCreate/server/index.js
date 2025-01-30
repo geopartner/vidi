@@ -16,6 +16,13 @@ var GC2_HOST = config.gc2.host;
 // Hardcoded host - config has internal name in docker-compose
 GC2_HOST = "https://mapgogc2.geopartner.dk";
 
+// if the HTTPS_PROXY is set, use it as proxy
+if (process.env.HTTPS_PROXY) {
+  var proxy = process.env.HTTPS_PROXY;
+  console.log("Using proxy: " + proxy);
+  request = request.defaults({ proxy: proxy });
+}
+
 // Set locale for date/time string
 moment.locale("da_DK");
 
