@@ -650,7 +650,7 @@ function getFoldersDn(caseid, nodetype) {
       userKey: USERKEY,
       userName: USERNAME,
     },
-    proxy: process.env.HTTPS_PROXY,
+    //proxy: process.env.HTTPS_PROXY,
   };
   console.log('getFoldersDn:', dnoptions);
 
@@ -770,7 +770,7 @@ function getPartId(partsyncid) {
       userKey: USERKEY,
       userName: USERNAME,
     },
-    proxy: process.env.HTTPS_PROXY,
+    //proxy: process.env.HTTPS_PROXY,
   };
   console.log('getPartId:', options);
   
@@ -839,7 +839,7 @@ function postCompanyToDn(compbody) {
         userKey: USERKEY,
         userName: USERNAME,
       },
-      proxy: process.env.HTTPS_PROXY,
+      //proxy: process.env.HTTPS_PROXY,
     };
   console.log('postCompanyToDn:', options);
 
@@ -889,7 +889,7 @@ function postCaseToDn(casebody) {
         userKey: USERKEY,
         userName: USERNAME,
       },
-      proxy: process.env.HTTPS_PROXY
+      //proxy: process.env.HTTPS_PROXY
     };
   console.log('postCaseToDn:', options);
 
@@ -945,7 +945,7 @@ function putPartToCaseDn(partbody, caseId) {
         userKey: USERKEY,
         userName: USERNAME,
       },
-      proxy: process.env.HTTPS_PROXY
+      //proxy: process.env.HTTPS_PROXY
     };
   console.log('putPartToCaseDn:', options);
 
@@ -997,7 +997,7 @@ function ReqToDn(requrl) {
       userKey: USERKEY,
       userName: USERNAME,
     },
-    proxy: process.env.HTTPS_PROXY,
+    //proxy: process.env.HTTPS_PROXY,
   };
   console.log('ReqToDn:', options);
   // Return new promise
