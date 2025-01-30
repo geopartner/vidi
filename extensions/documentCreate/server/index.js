@@ -16,13 +16,6 @@ var GC2_HOST = config.gc2.host;
 // Hardcoded host - config has internal name in docker-compose
 GC2_HOST = "https://mapgogc2.geopartner.dk";
 
-// if the HTTPS_PROXY is set, use it as proxy
-if (process.env.HTTPS_PROXY) {
-  var proxy = process.env.HTTPS_PROXY;
-  console.log("Using proxy: " + proxy);
-  request = request.defaults({ proxy: proxy });
-}
-
 // Set locale for date/time string
 moment.locale("da_DK");
 
@@ -813,6 +806,7 @@ function postToGC2(req, db) {
         "/4326",
       body: postData,
       method: "POST",
+      proxy: process.env.HTTPS_PROXY
     };
   return new Promise(function (resolve, reject) {
     request(options, function (err, resp, body) {
@@ -840,6 +834,7 @@ function postCompanyToDn(compbody) {
         userKey: USERKEY,
         userName: USERNAME,
       },
+      proxy: process.env.HTTPS_PROXY,
     };
   return new Promise(function (resolve, reject) {
     var req = https.request(options, function (res) {
@@ -887,6 +882,7 @@ function postCaseToDn(casebody) {
         userKey: USERKEY,
         userName: USERNAME,
       },
+      proxy: process.env.HTTPS_PROXY
     };
 
   if (DONTPOST) {
@@ -941,6 +937,7 @@ function putPartToCaseDn(partbody, caseId) {
         userKey: USERKEY,
         userName: USERNAME,
       },
+      proxy: process.env.HTTPS_PROXY
     };
   if (DONTPOST) {
     return new Promise(function (resolve, reject) {
