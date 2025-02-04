@@ -203,13 +203,13 @@ app.use((req, res, next) => {
 
 global.io = require('socket.io')(server);
 io.on('connection', (socket) => {
-    console.log(`[${new Date().toISOString()}] WebSocket connected: ${socket.id}`);
+    //console.log(`[${new Date().toISOString()}] WebSocket connected: ${socket.id}`);
 
     socket.on('error', (err) => {
-        console.error(`[${new Date().toISOString()}] WebSocket error on socket ${socket.id}: ${err.message}`);
+        //console.error(`[${new Date().toISOString()}] WebSocket error on socket ${socket.id}: ${err.message}`);
     });
 
     socket.on('disconnect', (reason) => {
-        console.log(`[${new Date().toISOString()}] WebSocket disconnected: ${socket.id}, Reason: ${reason}`);
+        //console.log(`[${new Date().toISOString()}] WebSocket disconnected: ${socket.id}, Reason: ${reason}`);
     });
 });
