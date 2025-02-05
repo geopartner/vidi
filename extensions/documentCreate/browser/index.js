@@ -1575,16 +1575,18 @@ module.exports = {
           if (_USERSTR.length == 0) {
             SetGUI_ControlState(GUI_CONTROL_STATE.AUTHENTICATE_SHOW_ALERT);
           }
-          if (window.status === "all_loaded") {
-            // Vidi trigger til print for total indlæsning af kort
-            console.log("all_loaded is set, starting for real");
-            // load with filters
-            setTimeout(() => {
+        });
+
+        backboneEvents.get().once("ready:serviceWorker", () => {
+          if (me.state.active) {
+              // load with filters
               loadAndInitFilters(me.state.active);
-            }, 2000);
+          } else {
+            console.log("ready:serviceWorker - documentcreate not active");
           }
         });
 
+        // Disables module
         backboneEvents.get().on(`off:${exId} off:all reset:all`, () => {
           console.log("Stopping documentCreate");
           me.setState({
@@ -1592,11 +1594,6 @@ module.exports = {
           });
           firstRunner = true;
           utils.cursorStyle().reset();
-        });
-
-        backboneEvents.get().on("allDoneLoading:layers", function () {
-          //console.log("inside allDoneLoading:layers, DClayers.length: " + DClayers.length + " me.state.active: " + me.state.active + " firstRunner: " + firstRunner);
-          //backboneEvents.get().trigger("refresh:meta");
         });
 
         console.log("documentCreate - Mounted");
