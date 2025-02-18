@@ -94,11 +94,13 @@ module.exports = {
             $('#tail').fadeOut(100);
         });
 
+        // Define how we want the menu to fade out
         let fadeOutMenu = function (fadeWhenDraggingClass) {
             fadeWhenDraggingClass.animate({opacity: '0.3'}, 200);
             fadeWhenDraggingClass.css('pointer-events', 'none');
         }
-
+         
+        // Define how we want the menu to fade in
         let fadeInMenu = function (fadeWhenDraggingClass) {
             fadeWhenDraggingClass.animate({opacity: '1'}, 200);
             fadeWhenDraggingClass.css('pointer-events', 'all');

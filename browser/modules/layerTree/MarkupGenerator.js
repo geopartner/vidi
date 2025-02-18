@@ -21,7 +21,7 @@ class MarkupGenerator {
 
     getAddButton(layerKeyWithGeom) {
         return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="display: none;" 
-            data-toggle="tooltip" data-bs-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn btn-secondary-outline btn-sm gc2-add-feature gc2-edit-tools">
+            data-toggle="tooltip" data-bs-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn btn-secondary btn-sm gc2-add-feature gc2-edit-tools">
             <i class="bi bi-plus-square"></i>
         </button>`);
     }
@@ -34,7 +34,7 @@ class MarkupGenerator {
                             <input class="form-check-input" type="checkbox" data-gc2-group-name="${name}">
                         </span>
                         <div class="position-relative flex-fill layer-group-checkbox-wrapper">
-                            <a class="text-uppercase text-body-secondary stretched-link accordion-toggle js-toggle-layer-panel collapsed" data-bs-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
+                            <button class="btn btn-link text-uppercase text-body-secondary stretched-link accordion-toggle js-toggle-layer-panel collapsed" data-bs-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</button>
                         </div>
                         <div class="layer-count badge bg-secondary">
                             <span>0</span> / <span></span>
@@ -117,8 +117,6 @@ class MarkupGenerator {
                                                                        title="${__("Layer is visible")}"><i class="bi bi-eye info-icon text-success"></i></span>
                                                                        <span class="js-layer-is-disabled" style="display: ${disableCheckBox ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
                                                                        title="${__("Locked")}"><i class="bi bi-lock text-danger"></i></span>
-                                                                       <span class="js-tiles-has-filter" style="display: none"};" data-toggle="tooltip" data-placement="right"
-                                                                        title="${__("Layer has filter")}"><i class="bi bi-filter text-success"></i></span>
                                                                        <span class="js-layer-has-parents info-icon" style="display: ${parentLayerKeys.length > 0 ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
                                                                        title="${__("Parents")}: ${parentLayerKeys.length > 0 ? parentLayerKeys.join(", ") : ""}"><i class="bi bi-arrow-up"></i></span>
                                                                        <span class="js-layer-has-children info-icon" style="display: ${childLayerKeys.length > 0 ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
@@ -133,7 +131,7 @@ class MarkupGenerator {
                     <div class="d-flex align-items-center gap-1"> 
                                                                         <div>${layerTypeSelector}</div>
                                                                         ${addButton}
-                                                                        <button data-toggle="tooltip" data-bs-placement="left" title="${tooltip}" style="display: ${displayInfo};" class="btn btn-secondary-outline btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
+                                                                        <button data-toggle="tooltip" data-bs-placement="left" title="${tooltip}" style="display: ${displayInfo};" class="btn btn-secondary btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
                                                     </div>
      
                 </div>

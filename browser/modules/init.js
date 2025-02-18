@@ -21,9 +21,10 @@ const md5 = require('md5');
 const cookie = require('js-cookie');
 const config = require('../../config/config.js');
 
-const bootstrap = require('bootstrap');
-
 import mustache from 'mustache';
+import dayjs from "dayjs";
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
 
 module.exports = {
 
@@ -47,7 +48,6 @@ module.exports = {
         const defaults = {
             schemata: [],
             baseLayers: [],
-            baseLayerGroups: [],
             autoPanPopup: false,
             crossMultiSelect: false,
             brandName: '',
@@ -69,9 +69,6 @@ module.exports = {
             wmsUriReplace: null,
             infoClickCursorStyle: 'crosshair',
             featureInfoTableOnMap: false,
-            popupDraggable: false,
-            measurementMDecimals: 1,
-            measurementKmDecimals: 2,
             showLayerGroupCheckbox: false,
             popupDraggable: false,
             activeLayers: [],
@@ -91,13 +88,14 @@ module.exports = {
                 default: 1,
                 active: false
             },
-            title: "MapConnect",
+            title: "MapCentia Vidi",
             autoUpdate: false,
             configSwitcher: false, // Use this only in build time configs,
             baselayerDrawer: false,
             theme: 'light',
             emptyInfoCallback: null,
             infoCallback: null,
+            dateFormats: {},
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {
@@ -105,13 +103,20 @@ module.exports = {
             // Try to remove existing cookie
             document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
             let options = {expires: MAXAGE};
-
             // if we are using https, set the secure and sameSite flags
             if (location.protocol === 'https:') {
                 options.secure = true;
                 options.sameSite = 'None';
             }
             cookie.set("connect.gc2", urlVars.session, options);
+            // Remove session from the URL if not print
+            if (!urlVars.px && !urlVars.py) {
+                const params = new URLSearchParams(window.location.search);
+                params.delete('session')
+                const loc = window.location
+                const newUrl = loc.origin + loc.pathname + (params.size >= 1 ? '?' + params.toString() : '')
+                history.pushState(null, '', newUrl);
+            }
         }
         // Set default for unset props
         for (let prop in defaults) {
@@ -193,6 +198,32 @@ module.exports = {
                 } else if (window.vidiConfig.defaultConfig) {
                     configFile = window.vidiConfig.defaultConfig;
                 }
+                // Register Handlebars helpers
+                Handlebars.registerHelper("formatDate", function(datetime, format = null, inFormat = null) {
+                    if (datetime == null) {
+                        return null;
+                    }
+                    const dateFormats = window.vidiConfig.dateFormats;
+                    if (format !== null && dateFormats.hasOwnProperty(format)) {
+                        return dayjs(datetime.toString(), inFormat).format(dateFormats[format]);
+                    } else {
+                        return dayjs(datetime.toString(), inFormat).format(format);
+                    }
+                });
+                Handlebars.registerHelper('breakLines', function (text) {
+                    if (text == null) {
+                        return null;
+                    }
+                    text = Handlebars.Utils.escapeExpression(text);
+                    text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
+                    return new Handlebars.SafeString(text);
+                });
+                Handlebars.registerHelper('replaceNull', function (value, text) {
+                    if (value === null) {
+                        return text;
+                    }
+                    return null;
+                });
 
                 if (configFile) {
                     loadConfig();
@@ -326,7 +357,7 @@ module.exports = {
             if (!cookie.get("vidi-startup-message") || md5(window.vidiConfig.startUpModal) !== cookie.get("vidi-startup-message")) {
                 if ($(`#startup-message-modal`).length === 0) {
                     $(`body`).append(`<div class="modal fade" id="startup-message-modal" tabindex="-1" role="dialog" aria-labelledby="startup-message-modalLabel">
-                        <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h4 class="modal-title" id="startup-message-modalLabel">${__(`Startup message`)}</h4>
@@ -490,21 +521,6 @@ module.exports = {
         /**
          * TODO remove if
          */
-
-        // Fix alignment-bug of leaflet-toolbar - rgb@Geopartner.dk
-        // Select the parent element with the specified classes
-        var parentElement = document.querySelector('.leaflet-top.leaflet-right');
-
-        // Check if the parent element exists to avoid errors
-        if (parentElement) {
-            // Select all child elements of the parent
-            var childElements = parentElement.querySelectorAll('*');
-
-            // Iterate through each child element and remove its style attribute
-            childElements.forEach(function(child) {
-                child.removeAttribute('style');
-            });
-        }
 
 
         if (urlVars.state || urlparser.hash.length === 0 && (!urlVars.initialFilter && !urlVars.dfi)) {

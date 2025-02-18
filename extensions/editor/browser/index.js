@@ -243,6 +243,14 @@ module.exports = {
             });
         });
 
+        backboneEvents.get().on("edit:editor", function (id, layerKey, isVector) {
+            _self.edit(getLayerById(parseInt(id)), layerKey, isVector);
+        });
+
+        backboneEvents.get().on("delete:editor", function (id, layerKey, isVector) {
+            _self.delete(getLayerById(parseInt(id)), layerKey, isVector);
+        });
+
         backboneEvents.get().on("ready:meta", function () {
             _self.setHandlersForVectorLayers();
             if (config?.extensionConfig?.editor?.addOnStart) {
@@ -255,7 +263,6 @@ module.exports = {
                         }, 200)
                     }
                 }
-
                 poll();
             }
         });
@@ -376,7 +383,7 @@ module.exports = {
                     title = fieldConf[key].alias;
                 }
                 properties[key] = {title, type: `string`};
-                if (fields[key].is_nullable !== true) {
+                if (fields[key]?.is_nullable === false) {
                     required.push(key);
                 }
 
@@ -438,12 +445,12 @@ module.exports = {
                 // Properties have priority over default types
                 if (fields[key]?.restriction?.length > 0) {
 
-                    // If there is a restriction, then convert the field to a select, and force the type to string
+                    // If there is a restriction, then convert the field to a select
                     uiSchema[key] = {
                         'ui:widget': 'select'
                     };
 
-                    // if the type is text, then the field is a select
+                    // if the type is text, change the field to string to get a select
                     if (fields[key].type === `text`) {
                         properties[key].type = `string`;
                     }
@@ -998,8 +1005,7 @@ module.exports = {
                 };
 
                 const featureIsUpdated = () => {
-                    console.log('Editor: featureIsUpdated, isVectorLayer:', isVectorLayer);
-                    switchLayer.registerLayerDataAlternation(schemaQualifiedName);
+                    // switchLayer.registerLayerDataAlternation(schemaQualifiedName);
                     me.stopEdit();
 
                     // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
@@ -1168,10 +1174,6 @@ module.exports = {
             // No need to reload layer if point feature was edited, as markers are destroyed anyway
             if (editedFeature.feature.geometry.type !== `Point` && editedFeature.feature.geometry.type !== `MultiPoint`) {
                 editedFeature.disableEdit();
-                if (featureWasEdited) {
-                    // switchLayer.init(editedFeature.id, false);
-                    switchLayer.init(editedFeature.id, true);
-                }
             }
         }
 

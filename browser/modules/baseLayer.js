@@ -681,8 +681,6 @@ module.exports = module.exports = {
                 let BLmaxZoom = bl.maxZoom? bl.maxZoom : 20;
                 let BLmaxNativeZoom = bl.maxNativeZoom? bl.maxNativeZoom : 18;
 
-
-                // Base layer can be a MVT layer
                 if (bl?.type === "WMTS") {
                     result = cloud.get().addWMTSBaselayer(bl.url, {
                         name: bl.id,

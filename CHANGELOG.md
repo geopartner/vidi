@@ -4,9 +4,107 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.2.1] - 2025-7-2
+## Added
+- In ConflictSearch modul the total length and area is calculated for intersections with lines and polygons and reported.
+- Individual buffer for layers. The buffer for a layer is set with the GC2 Meta option `buffer_conflict`, which is added to the buffer on the search polygon. In the result report the Individual set buffers are shown.
+- It's now possible to use the helper function `formatDate` in templates like this:
+  ```handlebars
+  {{formatDate date "D. MMMM YYYY" "YYYYMMDD"}}
+  ```
+  Where first argument is output format and the second is input format (if needed).
+- And template helper function `replaceNull` is also added, which replace null with a value:
+  ```handlebars
+  {{replaceNull date "No date"}}
+  ```
+  The function will not return a value, if input is not null.
+
+## [2025.2.0] - 2025-4-2
+### Added
+- Editor 'Edit' and 'Delete' buttons in feature table, so editing can be started without pop-up.
+
+### Fixed
+- The "Show table" is now given space, so it doesn't overlap other elements like off canvases.
+
+## [2025.1.5] - 2025-28-1
+### Fixed
+- The annotation tool in Draw is fixed. After upgrading 'marked' module, the code had to be adjusted.
+
+## [2025.1.4] - 2025-22-1
+### Fixed
+- The "Show table" table widget was on reload of layer duplicated in the DOM.
+- When disabling layer the table was not removed in other templates than embed.tmpl.
+- Styles regarding tables were adjusted.
+
+## [2025.1.3] - 2025-16-1
+### Fixed
+- Update Leaflet CSS path to use node_modules source. It was using an old CSS sheet. 
+
+## [2025.1.2] - 2025-15-1
+### Fixed
+- Refs in configs now works again. And they also works in external configs.
+
+## [2025.1.1] - 2025-13-1
+### Fixed
+- After editing raster layer, the layer was added again. Now it's only reloaded.
+
+## [2025.1.0] - 2025-8-1
+### Fixed
+- The removal of tke session parameter from URL after setting cookie caused an error in print. This is now fixed.
+
+## [2024.12.2] - 2024-17-12
+### Fixed
+- If `navigator.clipboard` is not available (e.g. on an unsecure connection), the Snapshot module will fall back to a
+  hacky method with `document.execCommand` for copying to the clipboard.
+
+## [2024.12.1] - 2024-16-12
+### Changed
+- Use a button instead of a link for layer panel toggle
+
+### Security
+- Remove session parameter from URL after setting cookie. This change ensures the session parameter is removed from the URL after it is used to set the cookie. It improves user privacy by preventing sensitive session data from lingering in the URL.
+
+## [2024.12.0] - 2024-11-12
+### Added
+- New option for setting the zoom-level of custom searches. default is level 18. The value can be set in the config, using the key `zoom`:
+```json
+{
+    "searchConfig": {
+        "size": 4,
+        "komkode": "*",
+        "esrSearchActive": true,
+        "sfeSearchActive": true,
+        "extraSearches": [{
+            "name": "stednavne_search",
+            "db": "dk",
+            "host": "https://dk.gc2.io",
+            "heading": "Stednavne",
+            "zoom": 20,
+            "index": {
+                "name": "stednavne/navne_samlet",
+                "field": "string",
+                "key": "gid"
+
+            },
+            "relation": {
+                "name": "stednavne.navne_samlet_geom",
+                "key": "gid",
+                "geom": "the_geom"
+            }
+        }]
+    }
+}
+```
+
+### Fixed
+- Bug in editor caused layers with restrictions to be output as textareas. Now the editor will correctly output a select with the values setup in GC2.
+- On mobile, it was possible for the menu to get into a stuck transparent state. This has been fixed.
+- A bug caused the defaults not to load in the `conflictSearch` module. This has been fixed.
+- Attributions and zoom-settings are now correctly passed onto WMTS layers.
+
 ## [2024.11.1] - 2024-21-11
 ### Fixed
-- Editor now handles JSON fields, which before rendered an syntax error in the decoding. 
+- Editor now handles JSON fields, which before rendered a syntax error in the decoding. 
 
 ## [2024.11.0] - 2024-21-11
 ### Added
@@ -25,13 +123,13 @@ and this project adheres to [CalVer](https://calver.org/).
   "maxNativeZoom": 19
 }
 ```
-- Also WMTS layer support is added for base layers:
+- Also, WMTS layer support is added for base layers:
 ```json
 {
   "type": "WMTS",
   "url": "https://api.dataforsyningen.dk/orto_foraar_webm_DAF?token=xxx&",
-  "tileMatrixSet": 'DFD_GoogleMapsCompatible',
-  "layer": 'orto_foraar_webm',
+  "tileMatrixSet": "DFD_GoogleMapsCompatible",
+  "layer": "orto_foraar_webm",
   "id": "wmts",
   "name": "Ortofoto (wmts)",
   "description": "Kort fra wmts",
