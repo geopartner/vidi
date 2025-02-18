@@ -2881,7 +2881,7 @@ module.exports = {
 			}
 		}
 	},
-	"vandvaerk_havndalvarme": { // Your print templates. "print" is the default
+	"havndalVarme": { // Your print templates. "print" is the default
 		A4: {
 			l: {
 				mapsizePx: [1060, 730],
